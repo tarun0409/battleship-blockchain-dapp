@@ -1,0 +1,26 @@
+{
+  "name": "battleship-blockchain-dapp",
+  "version": "1.0.0",
+  "description": "Blockchain based Decentralized Application for Battleship",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tarun0409/battleship-blockchain-dapp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tarun0409/battleship-blockchain-dapp/issues"
+  },
+  "homepage": "https://github.com/tarun0409/battleship-blockchain-dapp#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.7.10"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+}
