@@ -187,6 +187,17 @@ router.post('/:gameId/effect/:effect',(req,res) => {
                 gamesUpdateObj.Moves = games[0].Moves;
                 gamesUpdateObj.Current_Attacker = games[0].Current_Defender;
                 gamesUpdateObj.Current_Defender = games[0].Current_Attacker;
+                if(effect === "hit")
+                {
+                    if(String(games[0].Current_Defender) === String(games[0].Player_One))
+                    {
+                        gamesUpdateObj.Player_One_Remaining = games[0].Player_One_Remaining-1;
+                    }
+                    else
+                    {
+                        gamesUpdateObj.Player_Two_Remaining = games[0].Player_Two_Remaining-1;
+                    }
+                }
                 var grid1UpdateObj = {};
                 grid1UpdateObj.Grid = grids[0].Grid;
                 var grid2UpdateObj = {};
