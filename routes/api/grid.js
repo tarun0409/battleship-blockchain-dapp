@@ -122,10 +122,12 @@ router.post('/',(req,res) => {
                 if(String(games[0].Player_One) === String(playerId) && req.body.Type === "ocean" && !games[0].Player_One_Ocean_Grid)
                 {
                     gameUpdateObj.Player_One_Ocean_Grid = createdGrid[0]._id;
+                    gameUpdateObj.Player_One_Remaining = 17;
                 }
                 else if(String(games[0].Player_One) === String(playerId) && req.body.Type === "target" && !games[0].Player_One_Target_Grid)
                 {
                     gameUpdateObj.Player_One_Target_Grid = createdGrid[0]._id;
+                    gameUpdateObj.Player_One_Remaining = 17;
                 }
                 else if(String(games[0].Player_One) === String(playerId))
                 {
@@ -138,10 +140,12 @@ router.post('/',(req,res) => {
                 else if(String(games[0].Player_Two) === String(playerId) && req.body.Type === "ocean")
                 {
                     gameUpdateObj.Player_Two_Ocean_Grid = createdGrid[0]._id;
+                    gameUpdateObj.Player_Two_Remaining = 17;
                 }
                 else if(String(games[0].Player_Two) === String(playerId) && req.body.Type === "target")
                 {
                     gameUpdateObj.Player_Two_Target_Grid = createdGrid[0]._id;
+                    gameUpdateObj.Player_Two_Remaining = 17;
                 }
                 else
                 {
@@ -169,7 +173,7 @@ router.post('/',(req,res) => {
 
     }).catch((err) => {
         console.log(err);
-        return res.status(500).json({msg:"Problem with fetching games from the database"});
+        return res.status(500).json({msg:"Problem with fetching players from the database"});
     });
     
 });

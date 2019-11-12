@@ -72,11 +72,12 @@ router.post('/:playerId/join/:gameId',(req,res) => {
             if(pj === 0)
             {
                 gameUpdateObj.Player_One = playerId;
-                gameUpdateObj.Current_Turn = playerId;
+                gameUpdateObj.Current_Attacker = playerId;
             }
             else if(pj === 1)
             {
                 gameUpdateObj.Player_Two = playerId;
+                gameUpdateObj.Current_Defender = playerId;
             }
             gameUpdateObj.Players_Joined = (pj+1);
             updateQueryObj = {};
