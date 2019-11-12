@@ -15,6 +15,8 @@ var GameSchema = new Schema({
     Moves:Array,
     Player_One_Remaining:Number,
     Player_Two_Remaining:Number,
+    Player_One_Sunk_Ships:Array,
+    Player_Two_Sunk_Ships:Array,
     Winner: Schema.Types.ObjectId
 });
 

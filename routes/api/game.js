@@ -234,4 +234,69 @@ router.post('/:gameId/effect/:effect',(req,res) => {
         return res.status(500).json({msg:"Problem with fetching players from the database"});
     });
 });
+router.post('/:gameId/announce_sink/:ship',(req,res) => {
+    if(!req.query.playerId)
+    {
+        return res.status(400).json({msg:"Query fields to be included : playerId", query:req.query});
+    }
+    if(req.params.ship !== "Carrier" && req.params.ship !== "Battleship" && req.params.ship !== "Cruiser" && req.params.ship !== "Submarine" && req.params.ship !== "Destroyer")
+    {
+        return res.status(400).json({msg:"Ship is not valid", params:req.params});
+    }
+    var playerId = ObjectId(req.query.playerId);
+    var gameId = ObjectId(req.params.gameId);
+    var playerQuery = {};
+    playerQuery._id = playerId;
+    var gameQuery = {};
+    gameQuery._id = gameId;
+    var sunk_ship = req.params.ship;
+    Player.find(playerQuery).then((players) => {
+        if(players.length === 0)
+        {
+            return res.status(400).json({msg:"Invalid player ID", query:req.query.playerId});
+        }
+        Game.find(gameQuery).then((games) => {
+            if(games.length === 0)
+            {
+                return res.status(400).json({msg:"Invalid game ID", input:req.params.gameId});
+            }
+            var gameUpdateObj = {};
+            if(String(playerId) === String(games[0].Player_One) && !games[0].Player_One_Sunk_Ships.includes(sunk_ship))
+            {
+                games[0].Player_One_Sunk_Ships.push(sunk_ship);
+                gameUpdateObj.Player_One_Sunk_Ships = games[0].Player_One_Sunk_Ships;
+                if(games[0].Player_One_Sunk_Ships.length >= 5)
+                {
+                    gameUpdateObj.Winner = games[0].Player_Two;
+                }
+            }
+            if(String(playerId) === String(games[0].Player_Two) && !games[0].Player_Two_Sunk_Ships.includes(sunk_ship))
+            {
+                games[0].Player_Two_Sunk_Ships.push(sunk_ship);
+                gameUpdateObj.Player_Two_Sunk_Ships = games[0].Player_Two_Sunk_Ships;
+                if(games[0].Player_Two_Sunk_Ships.length >= 5)
+                {
+                    gameUpdateObj.Winner = games[0].Player_One;
+                }
+            }
+            var gameQueryObj = {};
+            gameQueryObj._id = gameId;
+            Game.updateOne(gameQueryObj,gameUpdateObj, (err) => {
+                if(err)
+                {
+                    return res.status(500).json({msg:"Some problem occurred while updating games in database"});
+                }
+                return res.status(200).json({msg:"Ship sinking"});
+            });
+            
+
+        }).catch((err) => {
+            console.log(err);
+            return res.status(500).json({msg:"Problem with fetching games from the database"});
+        });
+    }).catch((err) => {
+        console.log(err);
+        return res.status(500).json({msg:"Problem with fetching players from the database"});
+    });
+});
 module.exports = router;
