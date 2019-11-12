@@ -18,6 +18,22 @@ router.get('/',(req,res) => {
     });
 });
 
+router.get('/:id',(req,res) => {
+    var gameId = ObjectId(req.params.id);
+    var gameQuery = {};
+    gameQuery._id = gameId;
+    Game.find(gameQuery).then((games) => {
+        if(games.length === 0)
+        {
+            return res.status(204).json({admins:[]});
+        }
+        res.json({games});
+    }).catch((err) => {
+        console.log(err);
+        return res.status(500).json({msg:"Problem with fetching games from the database"});
+    });
+});
+
 router.post('/',(req,res) => {
     if(!req.body)
     {
@@ -286,7 +302,7 @@ router.post('/:gameId/announce_sink/:ship',(req,res) => {
                 {
                     return res.status(500).json({msg:"Some problem occurred while updating games in database"});
                 }
-                return res.status(200).json({msg:"Ship sinking"});
+                return res.status(200).json({msg:"Sunken ship registered successfully"});
             });
             
 

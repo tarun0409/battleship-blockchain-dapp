@@ -6,6 +6,63 @@ Player = require('../../models/Player.model');
 Game = require('../../models/Game.model');
 
 router.get('/',(req,res) => {
+    if(!req.query.playerId)
+    {
+        return res.status(400).json({msg:"Query field to be included: playerId", query:req.query});
+    }
+    if(!req.query.gameId)
+    {
+        return res.status(400).json({msg:"Query field to be included: gameId", query:req.query});
+    }
+    var playerId = ObjectId(req.query.playerId);
+    var gameId = ObjectId(req.query.gameId);
+    var playerQuery = {};
+    playerQuery._id = playerId;
+    var gameQuery = {};
+    gameQuery._id = gameId;
+    Player.find(playerQuery).then((players) => {
+        if(players.length === 0)
+        {
+            return res.status(400).json({msg:"Invalid player ID", query:req.query.playerId});
+        }
+        Game.find(gameQuery).then((games) => {
+            if(games.length === 0)
+            {
+                return res.status(400).json({msg:"Invalid game ID", input:req.params.gameId});
+            }
+            var gridQuery = {};
+            var gridIds = Array();
+            if(String(games[0].Player_One) === String(playerId))
+            {
+                gridIds.push(games[0].Player_One_Ocean_Grid);
+                gridIds.push(games[0].Player_One_Target_Grid);
+            }
+            else if(String(games[0].Player_Two) === String(playerId))
+            {
+                gridIds.push(games[0].Player_Two_Ocean_Grid);
+                gridIds.push(games[0].Player_Two_Target_Grid);
+            }
+            var inSubQuery = {};
+            inSubQuery["$in"] = gridIds;
+            gridQuery._id = inSubQuery;
+            Grid.find(gridQuery).then((grids) => {
+                if(grids.length === 0)
+                {
+                    return res.status(204).json({grids:[]});
+                }
+                res.status(200).json({grids});
+            }).catch((err) => {
+                console.log(err);
+                return res.status(500).json({msg:"Problem with fetching grids from the database"});
+            });
+        }).catch((err) => {
+            console.log(err);
+            return res.status(500).json({msg:"Problem with fetching games from the database"});
+        });
+    }).catch((err) => {
+        console.log(err);
+        return res.status(500).json({msg:"Problem with fetching players from the database"});
+    });
     Grid.find().then((grids) => {
         if(grids.length === 0)
         {

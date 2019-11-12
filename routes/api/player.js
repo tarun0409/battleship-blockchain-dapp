@@ -17,6 +17,22 @@ router.get('/',(req,res) => {
     });
 });
 
+router.get('/:id',(req,res) => {
+    var playerId = ObjectId(req.params.id);
+    var playerQuery = {};
+    playerQuery._id = playerId;
+    Player.find(playerQuery).then((players) => {
+        if(players.length === 0)
+        {
+            return res.status(204).json({players:[]});
+        }
+        res.json({players});
+    }).catch((err) => {
+        console.log(err);
+        return res.status(500).json({msg:"Problem with fetching players from the database"});
+    });
+});
+
 router.post('/',(req,res) => {
     if(!req.body)
     {
