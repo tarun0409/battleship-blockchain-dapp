@@ -11,7 +11,19 @@ router.get('/',(req,res) => {
         {
             return res.status(204).json({admins:[]});
         }
-        res.json({games});
+        var outputArr = Array();
+        for(var i=0; i<games.length; i++)
+        {
+            var gameObj = {};
+            gameObj.Name = games[i].Name;
+            gameObj.Players_Joined = games[i].Players_Joined;
+            if(games[i].Winner)
+            {
+                gameObj.Winner = games[i].Winner;
+            }
+            outputArr.push(gameObj);
+        }
+        res.json({games:outputArr});
     }).catch((err) => {
         console.log(err);
         return res.status(500).json({msg:"Problem with fetching games from the database"});

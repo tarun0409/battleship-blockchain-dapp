@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Battleship</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="index.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container mt-4">
+        <h3 class="text-center">Available Games</h3>
+        <table class="table table-bordered" id="gameTable">
+            <tr>
+                <th class="text-center">Name</th>
+                <th class="text-center">Number of Players Joined</th>
+                <th class="text-center">Winner</th>
+            </tr>
+        </table>
+    </div>
+    <div class="container mt-4">
+        <h3 class="text-center">Create Game</h3>
+        <div class="form-group">
+            <label for="Name">Name</label>
+            <input type="text" name="Name" id="gameName" class="form-control">
+        </div>
+        <button type="button" id="createGame" class="btn btn-primary btn-block">Create Game</button>
+    </div>
+</body>
+</html>
