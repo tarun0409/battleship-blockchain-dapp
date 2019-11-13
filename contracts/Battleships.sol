@@ -1,8 +1,8 @@
-pragma solidity ^0.5.12;
+pragma solidity ^0.5.11;
 
 contract Battleship 
 {
-  uint8 constant GRID_SIZE = 3;
+  uint8 constant GRID_SIZE = 10;
   uint8 constant SHIP_CARRIER = 5;
   uint8 constant SHIP_BATTLESHIP = 4;
   uint8 constant SHIP_CRUISER = 3;
@@ -11,9 +11,13 @@ contract Battleship
   uint private bidAmount = 1 ether;
   int8 constant HIT = 1;
   int8 constant MISS = -1;
+  uint miss = 0;
+  uint hit = 0;
+  uint empty = 0;
 
-
-
+  uint win;
+  uint lost;
+  uint nothin;
   enum GameStatus { OPEN, READY, STARTED, FINISHED, DONE }
   struct Game {
     GameStatus status;
@@ -26,8 +30,9 @@ contract Battleship
     uint funds;// amount required to play
     mapping (address => bytes32) secrets; // hashes of board
     mapping (address => string) ships; // (ocean board)original location of ships , will be stored during reveal
-    mapping (address => int8[]) targets; // target board corresponding to a user
+    mapping (address => int[]) targets; // target board corresponding to a user
     mapping (address => bool) cheated; // did a particular user cheat
+    
   }
   
   Game[] public games;
@@ -75,19 +80,53 @@ contract Battleship
     _;
   }
 
-
-
+  function getstate0() public view returns(uint)
+  {
+    return lost;
+  }
+  function getstate1() public view returns(uint)
+  {
+    return win;
+  }
+  function getstate2() public view returns(uint)
+  {
+    return nothin;
+  }
+  function getStatus(uint gameId) external view returns(GameStatus)
+  {
+    return games[gameId].status;
+  }
+  function getChallenger(uint gameId) external view returns(address)
+  {
+    return games[gameId].challenger;
+  }
+  function getOwner(uint gameId) external view returns(address)
+  {
+    return games[gameId].owner;
+  }
+  function getWinner(uint gameId) external view returns(address)
+  {
+    return games[gameId].winner;
+  }
+  function getTurn(uint gameId) external view returns(address)
+  {
+    return games[gameId].turn;
+  }
+  function getTargetIndex(uint gameId) external view returns(uint8)
+  {
+    return games[gameId].targetIndex;
+  }
   function getgame_list_of_a_player(address player) external view returns(uint[] memory)
   {
     return game_list_of_a_player[player];
   }
 
-  function getGameTarget(uint gameId, address player) external view returns(int8[] memory)
+  function getGameTarget(uint gameId, address player) external view returns(int[] memory)
   {
     return games[gameId].targets[player];
   }
 
-  function getGameOcean(uint gameId, address player) external view returns(int8[] memory)
+  function getGameOcean(uint gameId, address player) external view returns(int[] memory)
   {
     address opponent = getOpponent(gameId, player);
 
@@ -106,7 +145,7 @@ contract Battleship
     games[gameId].owner = msg.sender;
     games[gameId].turn = msg.sender; // set player1's turn
     games[gameId].secrets[msg.sender] = secret;
-    games[gameId].targets[msg.sender] = new int8[](gridSize ** 2); // make new target board for player1
+    games[gameId].targets[msg.sender] = new int[](gridSize ** 2); // make new target board for player1
     games[gameId].funds = msg.value;
 
     game_list_of_a_player[msg.sender].push(gameId);
@@ -122,7 +161,7 @@ contract Battleship
     games[gameId].status = GameStatus.READY;
     games[gameId].challenger = msg.sender; // player2 is the challenger
     games[gameId].secrets[msg.sender] = secret;
-    games[gameId].targets[msg.sender] = new int8[](games[gameId].gridSize ** 2); // make new target board for player2
+    games[gameId].targets[msg.sender] = new int[](games[gameId].gridSize ** 2); // make new target board for player2
     games[gameId].funds += msg.value;
 
     game_list_of_a_player[msg.sender].push(gameId);
@@ -130,12 +169,12 @@ contract Battleship
 
 function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
 {
-    uint8 ans=(x*3)+y;
+    uint8 ans = (x * 10) + y;
     return(ans);
 }
   function attack(uint gameId, uint8 x,uint8 y) public payable gameReady(gameId) myTurn(gameId)
   {
-      uint8 index=convert_to_1D(x,y);
+      uint8 index = convert_to_1D(x,y);
     address opponent = getOpponent(gameId, msg.sender);
 
     games[gameId].status = GameStatus.STARTED; // first attack happened
@@ -143,21 +182,22 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
     _attack(gameId, msg.sender, opponent, index);
   }
 
-  function counterAttack(uint gameId, uint8 x, uint8 y, bool hit) public payable gameStarted(gameId) myTurn(gameId)
+  function counterAttack(uint gameId, uint8 x, uint8 y, bool hitt) public payable gameStarted(gameId) myTurn(gameId)
   {
     uint8 index = convert_to_1D(x,y);  
     address opponent = getOpponent(gameId, msg.sender);
     uint8 targetIndex = games[gameId].targetIndex;
 
-    games[gameId].targets[opponent][targetIndex] = hit ? HIT : MISS;
+    games[gameId].targets[opponent][targetIndex] = hitt ? HIT : MISS;
 
     _attack(gameId, msg.sender, opponent, index);
 
     uint[3] memory state = getGridState(games[gameId].targets[opponent]);
-    uint fleet = getFleetSize(games[gameId].gridSize);
-
-    bool isWon = state[1] == fleet;
-
+    uint fleet = 17;//getFleetSize(games[gameId].gridSize);
+    lost = state[0];
+    win = state[1];
+    nothin = state[2];
+    bool isWon = state[1] >= fleet;
     bool isVoid = (fleet - state[1]) > state[2];
 
     if (isWon || isVoid) {
@@ -223,10 +263,7 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
   }
 
   function _attack(uint gameId, address attacker, address defender, uint8 index) internal {
-      gameId=gameId;
       attacker=attacker;
-      defender=defender;
-      index=index;
     games[gameId].targetIndex = index;
     games[gameId].turn = defender; // Toggle turn
 
@@ -242,11 +279,10 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
   }
 
 
-  function getGridState(int8[] memory grid) internal pure returns(uint[3] memory) {
-    uint miss;
-    uint hit;
-    uint empty;
-
+  function getGridState(int[] memory grid)public payable returns(uint[3] memory) {
+    hit = 0;
+    miss = 0;
+    empty = 0;
     for (uint i = 0; i < grid.length; i++) {
       if (grid[i] == MISS) {
         miss++;
