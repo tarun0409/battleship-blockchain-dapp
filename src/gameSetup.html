@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Battleship</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="cookies.js"></script>
+    <script src="gameSetup.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="gameSetup.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-6">
+                <table id="grid"></table>
+            </div>
+            <div class="col-lg-6" id="selectItems">
+                <div class="form-group">
+                    <select size=5 id="shipSelect" class="form-control">
+                        <option value="carrier">Carrier</option>
+                        <option value="battleship">Battleship</option>
+                        <option value="cruiser">Cruiser</option>
+                        <option value="submarine">Submarine</option>
+                        <option value="destroyer">Destroyer</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="radio-inline"><input type="radio" name="orientation" value="horizontal" checked>Horizontal</label>
+                    <label class="radio-inline"><input type="radio" name="orientation" value="vertical">Vertical</label>
+                </div>
+                <button type="button" id="setShip" class="btn btn-success">Select</button>
+                <button type="button" id="cancelSelect" class="btn btn-danger">Cancel</button>
+                
+            </div>
+        </div>
+        <div class="row" id="cbuttondiv">
+            <div class="col-lg-6">
+                <button type="button" id="finishConfigure" class="btn btn-primary btn-block">Configure</button>
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>
