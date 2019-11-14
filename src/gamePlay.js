@@ -15,89 +15,117 @@ $(document).ready(function(){
         type:"GET",
         url:getUrl,
         success: function(response){
-            console.log(response.grids.length);
-            for(var k=0; k<response.grids.length; k++)
-            {
-                var grid = response.grids[k].Grid;
-                if(response.grids[k].Type === "ocean")
-                {
-                    for(var i=0; i<10; i++)
+            var allGrids = response.grids;
+            var moveGet = "/game/"+getCookie('gameId')+"/move?playerId="+getCookie('playerId');
+            $.ajax({
+                type:"GET",
+                url:moveGet,
+                success: function(response){
+                    var attack_i = -1;
+                    var attack_j = -1;
+                    if(response.moves.length > 0 && !response.moves[response.moves.length-1].effect && response.defender === getCookie('playerId'))
                     {
-                        var trElement = document.createElement("tr");
-                        for(var j=0; j<10; j++)
-                        {
-                            var gridCell = document.createElement("td");
-                            var cellButton = document.createElement('button');
-                            cellButton.classList.add('oceanCell');
-                            cellButton.classList.add('btn-dark');
-                            cellButton.id = String((i*10)+j);
-                            cellButton.setAttribute('x',String(i));
-                            cellButton.setAttribute('y',String(j));
-                            var textNode = null;
-                            if(grid[i][j] === 1)
-                            {
-                                textNode = document.createTextNode('C');
-                            }
-                            else if(grid[i][j] === 2)
-                            {
-                                textNode = document.createTextNode('B');
-                            }
-                            else if(grid[i][j] === 3)
-                            {
-                                textNode = document.createTextNode('R');
-                            }
-                            else if(grid[i][j] === 4)
-                            {
-                                textNode = document.createTextNode('S');
-                            }
-                            else if(grid[i][j] === 5)
-                            {
-                                textNode = document.createTextNode('D');
-                            }
-                            if(textNode != null)
-                            {
-                                cellButton.appendChild(textNode);
-                            }
-                            gridCell.appendChild(cellButton);
-                            trElement.appendChild(gridCell);
-                        }
-                        document.getElementById('ocean').appendChild(trElement);
+                        attack_i = response.moves[response.moves.length-1].attack[0];
+                        attack_j = response.moves[response.moves.length-1].attack[1];
                     }
-                }
-                else
-                {
-                    for(var i=0; i<10; i++)
+                    for(var k=0; k<allGrids.length; k++)
                     {
-                        var trElement = document.createElement("tr");
-                        for(var j=0; j<10; j++)
+                        var grid = allGrids[k].Grid;
+                        if(allGrids[k].Type === "ocean")
                         {
-                            var gridCell = document.createElement("td");
-                            var cellButton = document.createElement('button');
-                            cellButton.classList.add('targetCell');
-                            cellButton.classList.add('btn-dark');
-                            cellButton.id = String((i*10)+j);
-                            cellButton.setAttribute('x',String(i));
-                            cellButton.setAttribute('y',String(j));
-                            var textNode = null;
-                            if(grid[i][j] === 1)
+                            for(var i=0; i<10; i++)
                             {
-                                textNode = document.createTextNode('H');
+                                var trElement = document.createElement("tr");
+                                for(var j=0; j<10; j++)
+                                {
+                                    var gridCell = document.createElement("td");
+                                    var cellButton = document.createElement('button');
+                                    cellButton.classList.add('oceanCell');
+                                    if(attack_i===i && attack_j===j)
+                                    {
+                                        cellButton.classList.add('btn-danger');
+                                    }
+                                    else
+                                    {
+                                        cellButton.classList.add('btn-dark');
+                                    }
+                                    cellButton.id = String((i*10)+j);
+                                    cellButton.setAttribute('x',String(i));
+                                    cellButton.setAttribute('y',String(j));
+                                    var textNode = null;
+                                    if(grid[i][j] === 1)
+                                    {
+                                        textNode = document.createTextNode('C');
+                                    }
+                                    else if(grid[i][j] === 2)
+                                    {
+                                        textNode = document.createTextNode('B');
+                                    }
+                                    else if(grid[i][j] === 3)
+                                    {
+                                        textNode = document.createTextNode('R');
+                                    }
+                                    else if(grid[i][j] === 4)
+                                    {
+                                        textNode = document.createTextNode('S');
+                                    }
+                                    else if(grid[i][j] === 5)
+                                    {
+                                        textNode = document.createTextNode('D');
+                                    }
+                                    if(textNode != null)
+                                    {
+                                        cellButton.appendChild(textNode);
+                                    }
+                                    gridCell.appendChild(cellButton);
+                                    trElement.appendChild(gridCell);
+                                }
+                                document.getElementById('ocean').appendChild(trElement);
                             }
-                            else if(grid[i][j] === -1)
-                            {
-                                textNode = document.createTextNode('M');
-                            }
-                            if(textNode != null)
-                            {
-                                cellButton.appendChild(textNode);
-                            }
-                            gridCell.appendChild(cellButton);
-                            trElement.appendChild(gridCell);
                         }
-                        document.getElementById('target').appendChild(trElement);
+                        else
+                        {
+                            for(var i=0; i<10; i++)
+                            {
+                                var trElement = document.createElement("tr");
+                                for(var j=0; j<10; j++)
+                                {
+                                    var gridCell = document.createElement("td");
+                                    var cellButton = document.createElement('button');
+                                    cellButton.classList.add('targetCell');
+                                    cellButton.classList.add('btn-dark');
+                                    cellButton.id = String((i*10)+j);
+                                    cellButton.setAttribute('x',String(i));
+                                    cellButton.setAttribute('y',String(j));
+                                    var textNode = null;
+                                    if(grid[i][j] === 1)
+                                    {
+                                        textNode = document.createTextNode('H');
+                                    }
+                                    else if(grid[i][j] === -1)
+                                    {
+                                        textNode = document.createTextNode('M');
+                                    }
+                                    else if(grid[i][j] === 2)
+                                    {
+                                        textNode = document.createTextNode('X');
+                                    }
+                                    if(textNode != null)
+                                    {
+                                        cellButton.appendChild(textNode);
+                                    }
+                                    gridCell.appendChild(cellButton);
+                                    trElement.appendChild(gridCell);
+                                }
+                                document.getElementById('target').appendChild(trElement);
+                            }
+                        }
                     }
+                },
+                error: function(response) {
+                    console.log(response.responseText);
                 }
-            }
+            });
         },
         error: function(response) {
             console.log(response.responseText);
@@ -139,5 +167,32 @@ $(document).ready(function(){
         });
         
     });
-
+    $("#hit").click(function(){
+        var hitUrl = "/game/"+getCookie('gameId')+"/effect/hit?playerId="+getCookie('playerId');
+        $.ajax({
+            type: "POST",
+            url: hitUrl,
+            success: function(response) {
+                window.location.href = '/battle';
+            },
+            error: function(response) {
+                alert(response.responseJSON.msg);
+                window.location.href = '/battle';
+            }
+        });
+    });
+    $("#miss").click(function(){
+        var hitUrl = "/game/"+getCookie('gameId')+"/effect/miss?playerId="+getCookie('playerId');
+        $.ajax({
+            type: "POST",
+            url: hitUrl,
+            success: function(response) {
+                window.location.href = '/battle';
+            },
+            error: function(response) {
+                alert(response.responseJSON.msg);
+                window.location.href = '/battle';
+            }
+        });
+    });
 });

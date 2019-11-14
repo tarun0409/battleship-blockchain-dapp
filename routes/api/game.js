@@ -135,8 +135,69 @@ router.post('/:gameId/attack',(req,res) => {
                 {
                     return res.status(500).json({msg:"Some problem occurred while updating game"});
                 }
-                return res.status(200).json({msg:"Attack launched successfully"});
+                var gridQuery = {};
+                if(String(games[0].Player_One) === String(playerId))
+                {
+                    gridQuery._id = games[0].Player_One_Target_Grid;
+                }
+                else
+                {
+                    gridQuery._id = games[0].Player_Two_Target_Grid;
+                }
+                Grid.find(gridQuery).then((grids) => {
+                    if(grids.length === 0)
+                    {
+                        return res.status(500).json({msg:"No target grid found"});
+                    }
+                    grids[0].Grid[parseInt(req.query.row)][parseInt(req.query.column)] = 2;
+                    gridUpdateObj = {};
+                    gridUpdateObj.Grid = grids[0].Grid;
+                    Grid.updateOne(gridQuery, gridUpdateObj, (err) => {
+                        if(err)
+                        {
+                            return res.status(500).json({msg:"Some problem occurred while updating grid"});
+                        }
+                        return res.status(200).json({msg:"Attack launched successfully"});
+                    });
+
+                }).catch((err) => {
+                    console.log(err);
+                    return res.status(500).json({msg:"Some problem occurred while fetching grid from database"});
+                });
+                
             });
+        }).catch((err) => {
+            console.log(err);
+            return res.status(500).json({msg:"Problem with fetching games from the database"});
+        });
+    }).catch((err) => {
+        console.log(err);
+        return res.status(500).json({msg:"Problem with fetching players from the database"});
+    });
+});
+
+router.get('/:gameId/move',(req,res) => {
+    if(!req.query.playerId)
+    {
+        return res.status(400).json({msg:"Query fields to be included : playerId", query:req.query});
+    }
+    var playerId = ObjectId(req.query.playerId);
+    var gameId = ObjectId(req.params.gameId);
+    var playerQuery = {};
+    playerQuery._id = playerId;
+    var gameQuery = {};
+    gameQuery._id = gameId;
+    Player.find(playerQuery).then((players) => {
+        if(players.length === 0)
+        {
+            return res.status(400).json({msg:"Invalid player ID", query:req.query.playerId});
+        }
+        Game.find(gameQuery).then((games) => {
+            if(games.length === 0)
+            {
+                return res.status(400).json({msg:"Invalid game ID", input:req.params.gameId});
+            }
+            return res.status(200).json({"moves":games[0].Moves, "defender":String(games[0].Current_Defender)});
         }).catch((err) => {
             console.log(err);
             return res.status(500).json({msg:"Problem with fetching games from the database"});

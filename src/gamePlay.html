@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="refresh" content="30;url=/battle">
     <title>Battleship</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="cookies.js"></script>
@@ -30,7 +31,10 @@
             </div>
         </div>
         <div class="row" id="abuttondiv">
-            <div class="col-lg-6"></div>
+            <div class="col-lg-6">
+                <button type="button" id="hit" class="btn btn-danger btn-block">Hit</button>
+                <button type="button" id="miss" class="btn btn-success btn-block">Miss</button>
+            </div>
             <div class="col-lg-6">
                 <button type="button" id="attack" class="btn btn-primary btn-block">Attack</button>
             </div>
