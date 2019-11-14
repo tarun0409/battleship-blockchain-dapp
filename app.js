@@ -71,6 +71,10 @@ app.get('/setup',(req,res) => {
     res.sendFile('src/gameSetup.html',{root: __dirname});
 });
 
+app.get('/battle',(req,res) => {
+    res.sendFile('src/gamePlay.html',{root: __dirname});
+});
+
 app.use('/game', require('./routes/api/game'));
 app.use('/player', require('./routes/api/player'));
 app.use('/grid', require('./routes/api/grid'));

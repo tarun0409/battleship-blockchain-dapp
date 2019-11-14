@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Battleship</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="cookies.js"></script>
+    <script src="gamePlay.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="gamePlay.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-6">
+                <h3 class="text-center">Ocean Grid</h3>
+            </div>
+            <div class="col-lg-6">
+                <h3 class="text-center">Target Grid</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <table id="ocean"></table>
+            </div>
+            <div class="col-lg-6" id="selectItems">
+                <table id="target"></table>
+            </div>
+        </div>
+        <div class="row" id="abuttondiv">
+            <div class="col-lg-6">
+                <button type="button" id="attack" class="btn btn-primary btn-block">Attack</button>
+            </div>
+        </div>
+        
+    </div>
+</body>
+</html>

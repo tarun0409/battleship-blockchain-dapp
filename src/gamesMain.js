@@ -77,8 +77,8 @@ $(document).ready(function(){
             dataType: "json",
             data: JSON.stringify(gameObj),
             success: function(response) {
-                alert("Game created");
                 console.log(response);
+                window.location.href = '/';
             },
             error: function(response) {
                 console.log(response.responseText);

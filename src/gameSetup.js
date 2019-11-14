@@ -156,7 +156,21 @@ $(document).ready(function(){
             dataType: "json",
             data: JSON.stringify(gridObj),
             success: function(response) {
-                window.location.href = '/play';
+                tGridObj = {};
+                tGridObj.Type = "target";
+                $.ajax({
+                    type: "POST",
+                    url: postUrl,
+                    contentType: "application/json",
+                    dataType: "json",
+                    data: JSON.stringify(tGridObj),
+                    success: function(response) {
+                        window.location.href = '/play';
+                    },
+                    error: function(response) {
+                        alert(response.responseJSON.msg);
+                    }
+                });
             },
             error: function(response) {
                 alert(response.responseJSON.msg);

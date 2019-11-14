@@ -163,7 +163,8 @@ router.post('/',(req,res) => {
                             {
                                 return res.status(400).json({msg:"Two ships cannot occupy a the same cell", input:req.body});
                             }
-                            theGrid[i][j] = ship_to_size[ship];
+                            // theGrid[i][j] = ship_to_size[ship];
+                            theGrid[i][j] = (k+1);
                         }
                     }
                 }

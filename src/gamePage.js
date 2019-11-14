@@ -12,4 +12,7 @@ $(document).ready(function() {
     $('#setup').click(function(){
         window.location.href='/setup';
     });
+    $('#play').click(function(){
+        window.location.href='/battle'
+    });
 });

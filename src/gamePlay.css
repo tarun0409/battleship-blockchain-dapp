@@ -1,0 +1,13 @@
+.oceanCell {
+    height: 50px;
+    width: 50px;
+}
+.targetCell {
+    height: 50px;
+    width: 50px;
+}
+
+#abuttondiv {
+    margin-top:20px;
+    margin-bottom:20px;
+}
