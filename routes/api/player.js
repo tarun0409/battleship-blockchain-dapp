@@ -1,4 +1,5 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 const router = express.Router();
 ObjectId = require('mongodb').ObjectID;
 Player = require('../../models/Player.model');
@@ -36,29 +37,54 @@ router.get('/:id',(req,res) => {
 router.post('/',(req,res) => {
     if(!req.body)
     {
-        return res.status(400).json({msg:"Invalid format.", input:req.body});
+        return res.status(400).json({msg:"Invalid format."});
     }
     var players = Array();
     var player = {};
-    if(!req.body.Name)
+    if(!req.body.User_Name)
     {
-        return res.status(400).json({msg:"Fields to be inserted : Name", input:req.body});
+        return res.status(400).json({msg:"Fields to be inserted : User_Name"});
     }
     if(!req.body.Public_Key)
     {
-        return res.status(400).json({msg:"Fields to be inserted : Public_Key", input:req.body});
+        return res.status(400).json({msg:"Fields to be inserted : Public_Key"});
     }
-    player.Name = req.body.Name;
-    var playerObj = new Player(player);
-    players.push(playerObj);
-    Player.create(players).then((createdPlayers) => {
-        successResponseObj = Object()
-        successResponseObj.msg = "Player created successfully!"
-        successResponseObj.data = createdPlayers;
-        return res.status(201).json(successResponseObj);
+    if(!req.body.Password)
+    {
+        return res.status(400).json({msg:"Fields to be inserted : Password"});
+    }
+    var playerQuery = {};
+    var orArr = Array();
+    var unObj = {};
+    unObj.User_Name = req.body.User_Name;
+    orArr.push(unObj);
+    var pkObj = {};
+    pkObj.Public_Key = req.body.Public_Key;
+    orArr.push(pkObj);
+    playerQuery["$or"] = orArr;
+    Player.find(playerQuery).then(async (players) => {
+        if(players.length > 0)
+        {
+            return res.status(400).json({msg:"User name or public key already taken"});
+        }
+        player.Name = req.body.Name;
+        player.Public_Key = req.body.Public_Key;
+        player.User_Name = req.body.User_Name;
+        player.Password = await bcrypt.hash(req.body.Password, 10);
+        var playerObj = new Player(player);
+        players.push(playerObj);
+        Player.create(players).then((createdPlayers) => {
+            successResponseObj = Object()
+            successResponseObj.msg = "Player created successfully!"
+            successResponseObj.id = createdPlayers[0]._id;
+            return res.status(201).json(successResponseObj);
+        }).catch((err) => {
+            console.log(err);
+            return res.status(500).json({msg:"Problem with inserting players to the database"});
+        });
     }).catch((err) => {
         console.log(err);
-        return res.status(500).json({msg:"Problem with inserting players to the database"});
+        return res.status(500).json({msg:"Problem with retrieving players from database"});
     });
 });
 router.post('/:playerId/join/:gameId',(req,res) => {

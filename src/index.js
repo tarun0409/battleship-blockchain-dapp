@@ -7,7 +7,7 @@ $(document).ready(function(){
             for(var i=0; i<games.length; i++)
             {
                 var trElement = document.createElement("tr");
-                trElement.classList.add("clickable-row");
+                // trElement.classList.add("clickable-row");
                 var gameNameTd = document.createElement("td");
                 gameNameTd.classList.add("text-center");
                 var gameNameText = document.createTextNode(games[i].Name);
@@ -51,11 +51,6 @@ $(document).ready(function(){
             error: function(response) {
                 console.log(response.responseText);
             }
-    });
-
-        // $.post("/elections", electionObj,  function(data, status){
-        //     console.log(status);
-        //     console.log(data);
-        // });
+        });
     });
 });

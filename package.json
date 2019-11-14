@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/tarun0409/battleship-blockchain-dapp#readme",
   "dependencies": {
+    "bcrypt": "^3.0.6",
     "express": "^4.17.1",
     "mongoose": "^5.7.10"
   },
