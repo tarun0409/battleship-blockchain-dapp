@@ -1,5 +1,4 @@
 $(document).ready(function(){
-    console.log(getCookie('playerId'));
     if(getCookie('playerId') == null || getCookie('playerId')=='null' || getCookie('playerId')==='null')
     {
         window.location.href='/login';
@@ -28,14 +27,30 @@ $(document).ready(function(){
                         var playersJoinedText = document.createTextNode(games[i].Players_Joined);
                         playersJoinedTd.appendChild(playersJoinedText);
                         trElement.appendChild(playersJoinedTd);
+                        var winnerTd = document.createElement("td");
+                        winnerTd.classList.add("text-center");
                         if(games[i].Winner)
                         {
-                            var winnerTd = document.createElement("td");
-                            winnerTd.classList.add("text-center");
                             var winnerText = document.createTextNode(games[i].Winner);
                             winnerTd.appendChild(winnerText);
-                            trElement.appendChild(winnerTd);
                         }
+                        else
+                        {
+                            var winnerText = document.createTextNode(" ");
+                            winnerTd.appendChild(winnerText);
+                        }
+                        trElement.appendChild(winnerTd);
+                        var joinTd = document.createElement("td");
+                        var joinButton = document.createElement('button');
+                        joinButton.setAttribute('type','button');
+                        joinButton.setAttribute('gameId',games[i].id);
+                        joinButton.classList.add('joinButton');
+                        joinButton.classList.add('btn');
+                        joinButton.classList.add('btn-success');
+                        var joinText = document.createTextNode("Join");
+                        joinButton.appendChild(joinText);
+                        joinTd.appendChild(joinButton);
+                        trElement.appendChild(joinTd);
                         document.getElementById("gameTable").appendChild(trElement);
                     }
                 },
@@ -67,6 +82,20 @@ $(document).ready(function(){
             },
             error: function(response) {
                 console.log(response.responseText);
+            }
+        });
+    });
+    $('#gameTable').on('click', '.joinButton', function() {
+        setCookie('gameId',$(this).attr('gameId'),1);
+        var joinUrl = "/player/"+getCookie('playerId')+"/join/"+$(this).attr('gameId');
+        $.ajax({
+            type: "POST",
+            url: joinUrl,
+            success: function(response) {
+                window.location.href='/play';
+            },
+            error: function(response) {
+                alert(response.responseJSON.msg);
             }
         });
     });

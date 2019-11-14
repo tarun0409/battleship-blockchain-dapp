@@ -15,6 +15,7 @@ router.get('/',(req,res) => {
         for(var i=0; i<games.length; i++)
         {
             var gameObj = {};
+            gameObj.id = String(games[i]._id);
             gameObj.Name = games[i].Name;
             gameObj.Players_Joined = games[i].Players_Joined;
             if(games[i].Winner)
