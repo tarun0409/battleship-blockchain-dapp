@@ -1,6 +1,7 @@
 express = require('express');
 const bcrypt = require('bcrypt');
 app = express();
+ObjectId = require('mongodb').ObjectID;
 mongoose = require('mongoose');
 Player = require('./models/Player.model');
 
@@ -12,7 +13,7 @@ app.use(express.urlencoded({extended:false}));
 app.use(express.static(__dirname+'/src'));
 
 app.get('/',(req,res) => {
-    res.sendFile('src/index.html', { root: __dirname });
+    res.sendFile('src/gamesMain.html', { root: __dirname });
 });
 
 app.get('/register',(req,res) => {
@@ -37,12 +38,28 @@ app.post('/login',(req,res) => {
         }
         if(await bcrypt.compare(req.body.Password,players[0].Password))
         {
-            return res.status(200).json({msg:"Login successful"});
+            return res.status(200).json({msg:"Login successful",id:players[0]._id});
         }
         return res.status(400).json({msg:"Incorrect Password"});
     }).catch((err) => {
         console.log(err);
         return res.status(500).json({msg:"Problem occurred while retrieving players from database"});
+    });
+});
+
+app.get('/validateLogin/:id',(req,res) => {
+    var playerId = ObjectId(req.params.id);
+    var playerQuery = {};
+    playerQuery._id = playerId;
+    Player.find(playerQuery).then((players) => {
+        if(players.length === 0)
+        {
+            return res.status(400).json({msg:"Player not registered"});
+        }
+        return res.status(200).json({msg:"Player validated"});
+    }).catch((err) => {
+        console.log(err);
+        return res.status(400).json({msg:"Problem occurred while retrieving players from database"});
     });
 });
 
