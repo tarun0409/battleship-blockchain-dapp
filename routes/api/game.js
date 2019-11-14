@@ -267,7 +267,7 @@ router.post('/:gameId/effect/:effect',(req,res) => {
                     }
                     else
                     {
-                        grids[i].Grid[index1][index2] = (effect === "hit")?grids[i].Grid[index1][index2]:-1;
+                        grids[i].Grid[index1][index2] = (effect === "hit")?-1:grids[i].Grid[index1][index2];
                     }
                 }
                 var gamesUpdateQuery = {};

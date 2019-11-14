@@ -53,7 +53,11 @@ $(document).ready(function(){
                                     cellButton.setAttribute('x',String(i));
                                     cellButton.setAttribute('y',String(j));
                                     var textNode = null;
-                                    if(grid[i][j] === 1)
+                                    if(grid[i][j] === -1)
+                                    {
+                                        textNode = document.createTextNode('X');
+                                    }
+                                    else if(grid[i][j] === 1)
                                     {
                                         textNode = document.createTextNode('C');
                                     }
