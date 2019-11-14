@@ -63,16 +63,6 @@ router.get('/',(req,res) => {
         console.log(err);
         return res.status(500).json({msg:"Problem with fetching players from the database"});
     });
-    Grid.find().then((grids) => {
-        if(grids.length === 0)
-        {
-            return res.status(204).json({grids:[]});
-        }
-        res.json({grids});
-    }).catch((err) => {
-        console.log(err);
-        return res.status(500).json({msg:"Problem with fetching grids from the database"});
-    });
 });
 
 router.post('/',(req,res) => {

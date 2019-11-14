@@ -9,11 +9,13 @@ $(document).ready(function(){
         window.location.href='/';
         return;
     }
+    clickedButton = null;
     var getUrl = "/grid?gameId="+getCookie('gameId')+"&playerId="+getCookie('playerId');
     $.ajax({
         type:"GET",
         url:getUrl,
         success: function(response){
+            console.log(response.grids.length);
             for(var k=0; k<response.grids.length; k++)
             {
                 var grid = response.grids[k].Grid;
@@ -100,6 +102,42 @@ $(document).ready(function(){
         error: function(response) {
             console.log(response.responseText);
         }
+    });
+
+    $('#target').on('click', '.targetCell', function() {
+        if(clickedButton != null)
+        {
+            $(clickedButton).removeClass('btn-light');
+            $(clickedButton).addClass('btn-dark');
+        }
+        clickedButton = this;
+        $(this).removeClass('btn-dark');
+        $(this).addClass('btn-light');
+    });
+
+    $("#attack").click(function(){
+        if(clickedButton == null) return;
+        var attackUrl = "/game/"+getCookie('gameId')+"/attack?playerId="+getCookie('playerId');
+        var x = $(clickedButton).attr('x');
+        var y = $(clickedButton).attr('y');
+        attackUrl+="&row="+x+"&column="+y;
+        $.ajax({
+            type: "POST",
+            url: attackUrl,
+            success: function(response) {
+                $(clickedButton).empty();
+                $(clickedButton).append("X");
+                $(clickedButton).removeClass('btn-light');
+                $(clickedButton).addClass('btn-dark'); 
+            },
+            error: function(response) {
+                alert(response.responseJSON.msg);
+                $(clickedButton).removeClass('btn-light');
+                $(clickedButton).addClass('btn-dark');
+                clickedButton = null;
+            }
+        });
+        
     });
 
 });

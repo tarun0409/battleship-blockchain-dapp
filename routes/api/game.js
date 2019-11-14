@@ -118,6 +118,10 @@ router.post('/:gameId/attack',(req,res) => {
             {
                 return res.status(400).json({msg:"Player cannot attack in this turn."});
             }
+            if(games[0].Moves.length > 0 && !games[0].Moves[games[0].Moves.length-1].effect)
+            {
+                return res.status(400).json({msg:"Player has already attacked in this turn"});
+            }
             moves = games[0].Moves;
             moveObj = {};
             moveObj.attack = [parseInt(req.query.row),parseInt(req.query.column)];
@@ -126,7 +130,7 @@ router.post('/:gameId/attack',(req,res) => {
             gameObj.Moves = moves;
             gameUpdateQueryObj = {};
             gameUpdateQueryObj._id = gameId;
-            Game.updateOne(updateQueryObj,gameObj, (err) => {
+            Game.updateOne(gameUpdateQueryObj,gameObj, (err) => {
                 if(err)
                 {
                     return res.status(500).json({msg:"Some problem occurred while updating game"});
