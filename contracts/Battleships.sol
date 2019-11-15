@@ -14,25 +14,30 @@ contract Battleship
   uint miss = 0;
   uint hit = 0;
   uint empty = 0;
-
   uint win;
   uint lost;
   uint nothin;
+  bytes positions;
+  uint shipp;
+  bytes1 cnt;
+  bytes32 secret_test;//=0x1bd1a2e6d0afcba49b2ce8cd8749126088dcbc0916ca2ac53e363cd5820db3c9;
   enum GameStatus { OPEN, READY, STARTED, FINISHED, DONE }
   struct Game {
     GameStatus status;
     uint8 gridSize; //board size
     uint8 targetIndex; //index of the attack this user makes
-    address owner; // who created the game
-    address challenger; // who joined the already created game
+    address payable owner; // who created the game
+    address payable challenger; // who joined the already created game
     address turn; // whose turn
     address winner; // who's the winner
     uint funds;// amount required to play
+    uint num; // move number
     mapping (address => bytes32) secrets; // hashes of board
     mapping (address => string) ships; // (ocean board)original location of ships , will be stored during reveal
     mapping (address => int[]) targets; // target board corresponding to a user
     mapping (address => bool) cheated; // did a particular user cheat
-    
+    uint8[100] moves_owner; // list of moves player1
+    uint8[100] moves_challenger;  // list of moves player2
   }
   
   Game[] public games;
@@ -80,6 +85,11 @@ contract Battleship
     _;
   }
 
+// function getHash(uint gameId) external view returns(uint)
+//   {
+//     return shipp;
+//   }
+  
   function getstate0() public view returns(uint)
   {
     return lost;
@@ -139,7 +149,7 @@ contract Battleship
     require (msg.value == bidAmount,"bid 1 ether");
     uint gameId = games.length;
     games.length++;
-
+    games[gameId].num = 0;
     games[gameId].status = GameStatus.OPEN; // created
     games[gameId].gridSize = gridSize;
     games[gameId].owner = msg.sender;
@@ -185,7 +195,7 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
   function counterAttack(uint gameId, uint8 x, uint8 y, bool hitt) public payable gameStarted(gameId) myTurn(gameId)
   {
     uint8 index = convert_to_1D(x,y);  
-    address opponent = getOpponent(gameId, msg.sender);
+    address payable opponent = getOpponent(gameId, msg.sender);
     uint8 targetIndex = games[gameId].targetIndex;
 
     games[gameId].targets[opponent][targetIndex] = hitt ? HIT : MISS;
@@ -203,78 +213,43 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
     if (isWon || isVoid) {
       games[gameId].status = GameStatus.FINISHED;
       games[gameId].winner = opponent;
+      //opponent.transfer(games[gameId].funds);
 
     }
   }
 
-  function reveal(uint gameId, string memory ships, string memory salt) public gameFinished(gameId) onlyPlayer(gameId) notRevealed(gameId)
+  function reveal(uint gameId, string memory salt, string memory ships, address player) public gameFinished(gameId) onlyPlayer(gameId) notRevealed(gameId)
   {
-    bytes32 secret = getSecret(ships, salt);
-
-    require(secret == games[gameId].secrets[msg.sender]);
-
-    bytes memory positions = bytes(ships);
-    bool cheated = false;
-
-    address opponent = getOpponent(gameId, msg.sender);
-
-    for (uint i = 0; i < positions.length; i++) {
-
-      if (positions[i] == "0") {
-        continue;
-      }
-
-      if (games[gameId].targets[opponent][i] == 0) {
-        continue;
-      }
-
-      cheated = games[gameId].targets[opponent][i] != HIT;
-
-      if (cheated) {
-        break;
-      }
-    
-    games[gameId].ships[msg.sender] = ships;
-    games[gameId].cheated[msg.sender] = cheated;
-
-    bool isDone = bytes(games[gameId].ships[opponent]).length > 0;
-
-    if (isDone) {
-      games[gameId].status = GameStatus.DONE;
-    }
-
-    if (cheated) {
-      if (games[gameId].winner == msg.sender) {
-        games[gameId].winner = address(0);
-      }
-
-      if (isDone && games[gameId].cheated[opponent] == false) {
-        games[gameId].winner = opponent;
-      }
-    }
+    require(getSecret(salt, ships) == games[gameId].secrets[player],"you cheated!");
   }
- }
 
   function withdraw(uint gameId) public onlyWinner(gameId) {
-    uint amount = games[gameId].funds;
-    games[gameId].funds = 0;
-
-    msg.sender.transfer(amount);
+    // uint amount = games[gameId].funds;
+    // games[gameId].funds = 0;
+    msg.sender.transfer(bidAmount);
   }
 
   function _attack(uint gameId, address attacker, address defender, uint8 index) internal {
-      attacker=attacker;
     games[gameId].targetIndex = index;
     games[gameId].turn = defender; // Toggle turn
+    if(games[gameId].owner == attacker)
+    {
+      games[gameId].moves_owner[games[gameId].num]=index;
+      games[gameId].num ++;
+    }
+    else
+    {
+      games[gameId].moves_challenger[games[gameId].num]=index;
+    }
 
   }
 
 
-  function getOpponent(uint gameId, address player) internal view returns(address) {
+  function getOpponent(uint gameId, address player) internal view returns(address payable) {
     return games[gameId].owner == player ? games[gameId].challenger : games[gameId].owner;
   }
 
-  function getSecret(string memory ships, string memory salt) internal pure returns(bytes32) {
+  function getSecret(string memory ships, string memory salt) private pure returns(bytes32) {
     return keccak256(abi.encodePacked(ships, salt));
   }
 
@@ -300,7 +275,13 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
     return [miss, hit, empty];
   }
 
-
+  function getMoveList(address player,uint gameId) public view returns(uint8[100] memory)
+  {
+    if(games[gameId].owner == player)
+      return games[gameId].moves_owner;
+    else
+      return games[gameId].moves_challenger;
+  }
   function getFleetSize(uint8 gridSize) internal pure returns(uint) {
       gridSize=10;
     return SHIP_CARRIER + SHIP_BATTLESHIP + SHIP_CRUISER + SHIP_SUBMARINE + SHIP_DESTROYER;
