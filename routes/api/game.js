@@ -197,7 +197,16 @@ router.get('/:gameId/move',(req,res) => {
             {
                 return res.status(400).json({msg:"Invalid game ID", input:req.params.gameId});
             }
-            return res.status(200).json({"moves":games[0].Moves, "defender":String(games[0].Current_Defender)});
+            var oppSunkShips = null;
+            if(String(playerId) === String(games[0].Player_One))
+            {
+                oppSunkShips = games[0].Player_Two_Sunk_Ships;
+            }
+            else
+            {
+                oppSunkShips = games[0].Player_One_Sunk_Ships;
+            }
+            return res.status(200).json({"moves":games[0].Moves, "defender":String(games[0].Current_Defender), "opponent_sunken_ships":oppSunkShips});
         }).catch((err) => {
             console.log(err);
             return res.status(500).json({msg:"Problem with fetching games from the database"});

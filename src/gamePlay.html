@@ -30,13 +30,37 @@
                 <table id="target"></table>
             </div>
         </div>
-        <div class="row" id="abuttondiv">
-            <div class="col-lg-6">
+        <div class="row buttondiv">
+            <div class="col-lg-4">
                 <button type="button" id="hit" class="btn btn-danger btn-block">Hit</button>
+            </div>
+            <div class="col-lg-4">
                 <button type="button" id="miss" class="btn btn-success btn-block">Miss</button>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-4">
                 <button type="button" id="attack" class="btn btn-primary btn-block">Attack</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-group">
+                    <select size=5 id="shipSelect" class="form-control">
+                        <option value="Carrier">Carrier</option>
+                        <option value="Battleship">Battleship</option>
+                        <option value="Cruiser">Cruiser</option>
+                        <option value="Submarine">Submarine</option>
+                        <option value="Destroyer">Destroyer</option>
+                    </select>
+                </div>
+                <div class="buttondiv">
+                    <button type="button" id="sinkShipButton" class="btn btn-danger btn-block">Announce Sink</button>
+                </div>  
+            </div>
+            <div class="col-lg-6">
+                <h4 class="text-center">Opponent's Sunken Ships</h4>
+                <ul class="list-group" id="sunkenList"></ul>
+                <h4 class="text-center">Moves</h4>
+                <table class="table table-bordered" id="moveTable"></table>
             </div>
         </div>
         

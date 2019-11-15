@@ -23,10 +23,12 @@ $(document).ready(function(){
                 success: function(response){
                     var attack_i = -1;
                     var attack_j = -1;
-                    if(response.moves.length > 0 && !response.moves[response.moves.length-1].effect && response.defender === getCookie('playerId'))
+                    moves = response.moves;
+                    oppSunkenShips = response.opponent_sunken_ships;
+                    if(moves.length > 0 && !moves[moves.length-1].effect && response.defender === getCookie('playerId'))
                     {
-                        attack_i = response.moves[response.moves.length-1].attack[0];
-                        attack_j = response.moves[response.moves.length-1].attack[1];
+                        attack_i = moves[moves.length-1].attack[0];
+                        attack_j = moves[moves.length-1].attack[1];
                     }
                     for(var k=0; k<allGrids.length; k++)
                     {
@@ -125,6 +127,28 @@ $(document).ready(function(){
                             }
                         }
                     }
+                    for(var p = moves.length-1; p>=0; p--)
+                    {
+                        var trElement = document.createElement("tr");
+                        var row = moves[p].attack[0] + 65;
+                        var tdText = String.fromCharCode(row)
+                        tdText += " "+String(moves[p].attack[1]+1);
+                        var tdElement1 = document.createElement("td");
+                        var attackNode = document.createTextNode(tdText);
+                        tdElement1.classList.add('text-center');
+                        tdElement1.appendChild(attackNode);
+                        trElement.appendChild(tdElement1);
+                        if(moves[p].effect)
+                        {
+                            var tdElement2 = document.createElement("td");
+                            tdElement2.classList.add('text-center');
+                            var effectNode = document.createTextNode(moves[p].effect);
+                            tdElement2.appendChild(effectNode);
+                            trElement.appendChild(tdElement2);
+                        }
+                        document.getElementById('moveTable').appendChild(trElement);
+                    }
+
                 },
                 error: function(response) {
                     console.log(response.responseText);
@@ -181,7 +205,6 @@ $(document).ready(function(){
             },
             error: function(response) {
                 alert(response.responseJSON.msg);
-                window.location.href = '/battle';
             }
         });
     });
@@ -195,8 +218,21 @@ $(document).ready(function(){
             },
             error: function(response) {
                 alert(response.responseJSON.msg);
-                window.location.href = '/battle';
             }
         });
+    });
+    $("#sinkShipButton").click(function(){
+        var sinkUrl = "/game/"+getCookie('gameId')+"/announce_sink/"+$("#shipSelect").val()+"?playerId="+getCookie('playerId');
+        $.ajax({
+            type: "POST",
+            url: sinkUrl,
+            success: function(response) {
+                window.location.href = '/battle';
+            },
+            error: function(response) {
+                alert(response.responseJSON.msg);
+            }
+        });
+
     });
 });
