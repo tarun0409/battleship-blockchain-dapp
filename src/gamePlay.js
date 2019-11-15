@@ -127,6 +127,16 @@ $(document).ready(function(){
                             }
                         }
                     }
+                    if(moves.length === 0)
+                    {
+                        var trElement = document.createElement("tr");
+                        var tdElement1 = document.createElement("td");
+                        tdElement1.classList.add('text-center');
+                        var attackNode = document.createTextNode("No moves made by any player yet");
+                        tdElement1.appendChild(attackNode);
+                        trElement.appendChild(tdElement1);
+                        document.getElementById('moveTable').appendChild(trElement);
+                    }
                     for(var p = moves.length-1; p>=0; p--)
                     {
                         var trElement = document.createElement("tr");
@@ -148,7 +158,24 @@ $(document).ready(function(){
                         }
                         document.getElementById('moveTable').appendChild(trElement);
                     }
-
+                    if(oppSunkenShips.length === 0)
+                    {
+                        var liElement = document.createElement("li");
+                        liElement.classList.add('list-group-item');
+                        liElement.classList.add('text-center');
+                        var shipNode = document.createTextNode("No ships sunk yet");
+                        liElement.appendChild(shipNode);
+                        document.getElementById('sunkenList').appendChild(liElement);
+                    }
+                    for(var p = oppSunkenShips.length-1; p>=0; p--)
+                    {
+                        var liElement = document.createElement("li");
+                        liElement.classList.add('list-group-item');
+                        liElement.classList.add('text-center');
+                        var shipNode = document.createTextNode(oppSunkenShips[p]);
+                        liElement.appendChild(shipNode);
+                        document.getElementById('sunkenList').appendChild(liElement);
+                    }
                 },
                 error: function(response) {
                     console.log(response.responseText);
