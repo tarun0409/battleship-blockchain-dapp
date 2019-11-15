@@ -21,6 +21,13 @@ $(document).ready(function(){
                 type:"GET",
                 url:moveGet,
                 success: function(response){
+                    if(response.winner)
+                    {
+                        if(window.confirm(response.msg))
+                        {
+                            window.location.href = '/';
+                        }
+                    }
                     var attack_i = -1;
                     var attack_j = -1;
                     moves = response.moves;

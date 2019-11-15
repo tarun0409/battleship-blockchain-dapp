@@ -26,4 +26,7 @@ $(document).ready(function(){
             }
         });
     });
+    $("#loginPlayer").click(function(){
+        window.location.href = '/login';
+    });
 });

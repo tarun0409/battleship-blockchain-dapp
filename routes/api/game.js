@@ -12,6 +12,7 @@ router.get('/',(req,res) => {
             return res.status(204).json({admins:[]});
         }
         var outputArr = Array();
+        var winnerIds = Array(); 
         for(var i=0; i<games.length; i++)
         {
             var gameObj = {};
@@ -20,11 +21,36 @@ router.get('/',(req,res) => {
             gameObj.Players_Joined = games[i].Players_Joined;
             if(games[i].Winner)
             {
-                gameObj.Winner = games[i].Winner;
+                winnerIds.push(games[i].Winner) ;
+                gameObj.WinnerId = games[i].Winner;   
             }
             outputArr.push(gameObj);
         }
-        res.json({games:outputArr});
+        var winnerQuery = {};
+        var inQuery = {};
+        inQuery["$in"] = winnerIds;
+        winnerQuery._id = inQuery;
+        Player.find(winnerQuery).then((players) => {
+            
+            for(var i=0; i<outputArr.length; i++)
+            {
+                if(outputArr[i].WinnerId)
+                {
+                    for(var j=0; j<players.length; j++)
+                    {
+                        if(String(outputArr[i].WinnerId) === String(players[j]._id))
+                        {
+                            outputArr[i].Winner = players[j].User_Name;
+                            break;
+                        }
+                    }
+                }
+            }
+            res.json({games:outputArr});
+        }).catch((err) => {
+            console.log(err);
+            return res.status(500).json({msg:"Problem with fetching winner from the database"});
+        });
     }).catch((err) => {
         console.log(err);
         return res.status(500).json({msg:"Problem with fetching games from the database"});
@@ -196,6 +222,11 @@ router.get('/:gameId/move',(req,res) => {
             if(games.length === 0)
             {
                 return res.status(400).json({msg:"Invalid game ID", input:req.params.gameId});
+            }
+            if(games[0].Winner)
+            {
+                msg = (String(playerId) === String(games[0].Winner))?"You have won the game!":"Your opponent has won the game!";
+                return res.status(200).json({winner:games[0].Winner, msg})
             }
             var oppSunkShips = null;
             if(String(playerId) === String(games[0].Player_One))
