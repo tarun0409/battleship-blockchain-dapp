@@ -38,7 +38,7 @@ app.post('/login',(req,res) => {
         }
         if(await bcrypt.compare(req.body.Password,players[0].Password))
         {
-            return res.status(200).json({msg:"Login successful",id:players[0]._id});
+            return res.status(200).json({msg:"Login successful",id:players[0]._id, Public_Key:players[0].Public_Key});
         }
         return res.status(400).json({msg:"Incorrect Password"});
     }).catch((err) => {

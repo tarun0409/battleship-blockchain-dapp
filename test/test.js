@@ -8,7 +8,7 @@ var playerTwoBoard = "0000000000000000000000005000000000544440000050003000005000
 contract('Battleship ::: Test 1',function(accounts){
   const playerA = accounts[0];
   const playerB = accounts[1];
-  let gameId = -1;
+  let gameId = web3.utils.fromAscii("random");
   let secret;
   let salt1,salt2;
   salt1 = "hello";
@@ -17,10 +17,10 @@ contract('Battleship ::: Test 1',function(accounts){
   it("should create game", async () => {
     const bs = await battleship.deployed();
     const one_ether = await web3.utils.toWei("1");
-    gameId++; // 0
+    // gameId++; // 0
 
     
-    await bs.createGame(10, playerOneBoardHash, { from: playerA, value:one_ether });
+    await bs.createGame(gameId, 10, playerOneBoardHash, { from: playerA, value:one_ether });
 
     status = await bs.getStatus(gameId);
     
@@ -174,7 +174,7 @@ it("loser should not withdraw funds", async () => {
     //
   }
 });
-
+});
 // Makes sure Winner can withdraw funds
 // it("winner should withdraw game funds", async () => {
 //   const bs = await battleship.deployed();

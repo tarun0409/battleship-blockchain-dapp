@@ -20,6 +20,7 @@ $(document).ready(function(){
             data: JSON.stringify(playerObj),
             success: function(response) {
                 setCookie('playerId',response.id);
+                setCookie('publicKey',response.Public_Key);
                 window.location.href = '/'
             },
             error: function(response) {

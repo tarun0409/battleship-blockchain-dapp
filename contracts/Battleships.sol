@@ -1,4 +1,4 @@
-pragma solidity ^0.5.11;
+pragma solidity >=0.4.22 <0.6.0;
 
 contract Battleship 
 {
@@ -40,47 +40,48 @@ contract Battleship
     uint8[100] moves_challenger;  // list of moves player2
   }
   
-  Game[] public games;
+  // Game[] public games;
+  mapping (bytes32 => Game) public games;
 
-  mapping (address => uint[]) private game_list_of_a_player;
+  // mapping (address => uint[]) private game_list_of_a_player;
 
-  modifier onlyPlayer(uint gameId) {
+  modifier onlyPlayer(bytes32 gameId) {
     require(msg.sender == games[gameId].owner || msg.sender == games[gameId].challenger); // either player1 or player2 only
     _;
   }
 
-  modifier onlyWinner(uint gameId) {
+  modifier onlyWinner(bytes32 gameId) {
     require(games[gameId].status == GameStatus.DONE); 
     require(games[gameId].winner == msg.sender); 
     _;
   }
 
-  modifier myTurn(uint gameId) {
+  modifier myTurn(bytes32 gameId) {
     require(msg.sender == games[gameId].turn);
     _;
   }
 
-  modifier gameOpen(uint gameId) {
+  modifier gameOpen(bytes32 gameId) {
     require(games[gameId].status == GameStatus.OPEN);
     _;
   }
 
-  modifier gameReady(uint gameId) {
+  modifier gameReady(bytes32 gameId) {
     require(games[gameId].status == GameStatus.READY);
     _;
   }
 
-  modifier gameStarted(uint gameId) {
+  modifier gameStarted(bytes32 gameId) {
     require(games[gameId].status == GameStatus.STARTED);
     _;
   }
 
-  modifier gameFinished(uint gameId) {
+  modifier gameFinished(bytes32 gameId) {
     require(games[gameId].status == GameStatus.FINISHED);
     _;
   }
 
-  modifier notRevealed(uint gameId) {
+  modifier notRevealed(bytes32 gameId) {
     require(bytes(games[gameId].ships[msg.sender]).length == 0); // not revealed => not yet stored in ocean board
     _;
   }
@@ -102,41 +103,41 @@ contract Battleship
   {
     return nothin;
   }
-  function getStatus(uint gameId) external view returns(GameStatus)
+  function getStatus(bytes32 gameId) external view returns(GameStatus)
   {
     return games[gameId].status;
   }
-  function getChallenger(uint gameId) external view returns(address)
+  function getChallenger(bytes32 gameId) external view returns(address)
   {
     return games[gameId].challenger;
   }
-  function getOwner(uint gameId) external view returns(address)
+  function getOwner(bytes32 gameId) external view returns(address)
   {
     return games[gameId].owner;
   }
-  function getWinner(uint gameId) external view returns(address)
+  function getWinner(bytes32 gameId) external view returns(address)
   {
     return games[gameId].winner;
   }
-  function getTurn(uint gameId) external view returns(address)
+  function getTurn(bytes32 gameId) external view returns(address)
   {
     return games[gameId].turn;
   }
-  function getTargetIndex(uint gameId) external view returns(uint8)
+  function getTargetIndex(bytes32 gameId) external view returns(uint8)
   {
     return games[gameId].targetIndex;
   }
-  function getgame_list_of_a_player(address player) external view returns(uint[] memory)
-  {
-    return game_list_of_a_player[player];
-  }
+  // function getgame_list_of_a_player(address player) external view returns(uint[] memory)
+  // {
+  //   return game_list_of_a_player[player];
+  // }
 
-  function getGameTarget(uint gameId, address player) external view returns(int[] memory)
+  function getGameTarget(bytes32 gameId, address player) external view returns(int[] memory)
   {
     return games[gameId].targets[player];
   }
 
-  function getGameOcean(uint gameId, address player) external view returns(int[] memory)
+  function getGameOcean(bytes32 gameId, address player) external view returns(int[] memory)
   {
     address opponent = getOpponent(gameId, player);
 
@@ -144,11 +145,11 @@ contract Battleship
   }
 
   
-  function createGame(uint8 gridSize, bytes32 secret) public payable
+  function createGame(bytes32 gameId, uint8 gridSize, bytes32 secret) public payable
   {
     require (msg.value == bidAmount,"bid 1 ether");
-    uint gameId = games.length;
-    games.length++;
+    // uint gameId = games.length;
+    // games.length++;
     games[gameId].num = 0;
     games[gameId].status = GameStatus.OPEN; // created
     games[gameId].gridSize = gridSize;
@@ -158,11 +159,11 @@ contract Battleship
     games[gameId].targets[msg.sender] = new int[](gridSize ** 2); // make new target board for player1
     games[gameId].funds = msg.value;
 
-    game_list_of_a_player[msg.sender].push(gameId);
+    // game_list_of_a_player[msg.sender].push(gameId);
 
   }
 
-  function joinGame(uint gameId, bytes32 secret) public payable gameOpen(gameId)
+  function joinGame(bytes32 gameId, bytes32 secret) public payable gameOpen(gameId)
   {
     require (msg.value == bidAmount,"bid 1 ether");  
     require(games[gameId].owner != msg.sender ,"owner cannot join again, he already has!"); 
@@ -174,7 +175,7 @@ contract Battleship
     games[gameId].targets[msg.sender] = new int[](games[gameId].gridSize ** 2); // make new target board for player2
     games[gameId].funds += msg.value;
 
-    game_list_of_a_player[msg.sender].push(gameId);
+    // game_list_of_a_player[msg.sender].push(gameId);
   }
 
 function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
@@ -182,7 +183,7 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
     uint8 ans = (x * 10) + y;
     return(ans);
 }
-  function attack(uint gameId, uint8 x,uint8 y) public payable gameReady(gameId) myTurn(gameId)
+  function attack(bytes32 gameId, uint8 x,uint8 y) public payable gameReady(gameId) myTurn(gameId)
   {
       uint8 index = convert_to_1D(x,y);
     address opponent = getOpponent(gameId, msg.sender);
@@ -192,7 +193,7 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
     _attack(gameId, msg.sender, opponent, index);
   }
 
-  function counterAttack(uint gameId, uint8 x, uint8 y, bool hitt) public payable gameStarted(gameId) myTurn(gameId)
+  function counterAttack(bytes32 gameId, uint8 x, uint8 y, bool hitt) public payable gameStarted(gameId) myTurn(gameId)
   {
     uint8 index = convert_to_1D(x,y);  
     address payable opponent = getOpponent(gameId, msg.sender);
@@ -218,19 +219,19 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
     }
   }
 
-  function reveal(uint gameId, string memory salt, string memory ship, address player) public gameFinished(gameId) onlyPlayer(gameId) notRevealed(gameId)
+  function reveal(bytes32 gameId, string memory salt, string memory ship, address player) public gameFinished(gameId) onlyPlayer(gameId) notRevealed(gameId)
   {
     require(getSecret(salt, ship) == games[gameId].secrets[player],"you cheated!");
     games[gameId].ships[player] = ship;
   }
 
-  function withdraw(uint gameId) public onlyWinner(gameId) {
+  function withdraw(bytes32 gameId) public onlyWinner(gameId) {
     // uint amount = games[gameId].funds;
     // games[gameId].funds = 0;
     msg.sender.transfer(bidAmount);
   }
 
-  function _attack(uint gameId, address attacker, address defender, uint8 index) internal {
+  function _attack(bytes32 gameId, address attacker, address defender, uint8 index) internal {
     games[gameId].targetIndex = index;
     games[gameId].turn = defender; // Toggle turn
     if(games[gameId].owner == attacker)
@@ -246,7 +247,7 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
   }
 
 
-  function getOpponent(uint gameId, address player) internal view returns(address payable) {
+  function getOpponent(bytes32 gameId, address player) internal view returns(address payable) {
     return games[gameId].owner == player ? games[gameId].challenger : games[gameId].owner;
   }
 
@@ -276,17 +277,17 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
     return [miss, hit, empty];
   }
 
-  function getMoveList(address player,uint gameId) public view returns(uint8[100] memory)
+  function getMoveList(address player,bytes32 gameId) public view returns(uint8[100] memory)
   {
     if(games[gameId].owner == player)
       return games[gameId].moves_owner;
     else
       return games[gameId].moves_challenger;
   }
-  function getFleetSize(uint8 gridSize) internal pure returns(uint) {
-      gridSize=10;
-    return SHIP_CARRIER + SHIP_BATTLESHIP + SHIP_CRUISER + SHIP_SUBMARINE + SHIP_DESTROYER;
-  }
+  // function getFleetSize(uint8 gridSize) internal pure returns(uint) {
+  //     // gridSize=10;
+  //   return SHIP_CARRIER + SHIP_BATTLESHIP + SHIP_CRUISER + SHIP_SUBMARINE + SHIP_DESTROYER;
+  // }
 
  
 }
