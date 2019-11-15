@@ -109,7 +109,14 @@ router.post('/:playerId/join/:gameId',(req,res) => {
             var gameUpdateObj = {};
             if(pj >= 2)
             {
-                return res.status(400).json({msg:"All players joined in the game."});
+                if(String(playerId) === String(games[0].Player_One) || String(playerId) === String(games[0].Player_Two))
+                {
+                    return res.status(200).json({msg:"Player already joined"});
+                }
+                else
+                {
+                    return res.status(400).json({msg:"All players joined in the game."});
+                }
             }
             if(pj === 0)
             {

@@ -14,6 +14,16 @@ $(document).ready(function(){
                 url:"/game",
                 success: function(response){
                     games = response.games;
+                    if(games.length === 0)
+                    {
+                        var trElement = document.createElement("tr");
+                        var gameNameTd = document.createElement("td");
+                        gameNameTd.classList.add("text-center");
+                        var gameNameText = document.createTextNode("No games available.");
+                        gameNameTd.appendChild(gameNameText);
+                        trElement.appendChild(gameNameTd);
+                        document.getElementById("gameTable").appendChild(trElement);
+                    }
                     for(var i=0; i<games.length; i++)
                     {
                         var trElement = document.createElement("tr");
