@@ -218,9 +218,10 @@ function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
     }
   }
 
-  function reveal(uint gameId, string memory salt, string memory ships, address player) public gameFinished(gameId) onlyPlayer(gameId) notRevealed(gameId)
+  function reveal(uint gameId, string memory salt, string memory ship, address player) public gameFinished(gameId) onlyPlayer(gameId) notRevealed(gameId)
   {
-    require(getSecret(salt, ships) == games[gameId].secrets[player],"you cheated!");
+    require(getSecret(salt, ship) == games[gameId].secrets[player],"you cheated!");
+    games[gameId].ships[player] = ship;
   }
 
   function withdraw(uint gameId) public onlyWinner(gameId) {
