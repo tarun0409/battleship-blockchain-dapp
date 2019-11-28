@@ -4,6 +4,7 @@ app = express();
 ObjectId = require('mongodb').ObjectID;
 mongoose = require('mongoose');
 Player = require('./models/Player.model');
+const fs = require('fs');
 
 var db = 'mongodb://localhost/battleship';
 mongoose.connect(db);
@@ -61,6 +62,12 @@ app.get('/validateLogin/:id',(req,res) => {
         console.log(err);
         return res.status(400).json({msg:"Problem occurred while retrieving players from database"});
     });
+});
+
+app.get('/contract',(req,res) => {
+    let contractData = fs.readFileSync('build/contracts/Battleship.json');
+    let contractObj = JSON.parse(contractData);
+    return res.status(200).json({contract:contractObj});
 });
 
 app.get('/play',(req,res) => {

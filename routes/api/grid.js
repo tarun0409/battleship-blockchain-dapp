@@ -4,6 +4,7 @@ ObjectId = require('mongodb').ObjectID;
 Grid = require('../../models/Grid.model');
 Player = require('../../models/Player.model');
 Game = require('../../models/Game.model');
+// BlockchainApp = require('../../utils/blockchain');
 
 router.get('/',(req,res) => {
     if(!req.query.playerId)
@@ -153,7 +154,6 @@ router.post('/',(req,res) => {
                             {
                                 return res.status(400).json({msg:"Two ships cannot occupy a the same cell", input:req.body});
                             }
-                            // theGrid[i][j] = ship_to_size[ship];
                             theGrid[i][j] = (k+1);
                         }
                     }

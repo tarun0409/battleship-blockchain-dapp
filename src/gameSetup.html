@@ -6,6 +6,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Battleship</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="web3.min.js"></script>
+    <script src="truffle-contract.js"></script>
+    <script src="blockchain.js"></script>
     <script src="cookies.js"></script>
     <script src="gameSetup.js"></script>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -38,6 +41,9 @@
         </div>
         <div class="row" id="cbuttondiv">
             <div class="col-lg-6">
+                <div class="form-group">
+                    <input type="text" name="nonce" id="nonce" class="form-control">
+                </div>
                 <button type="button" id="finishConfigure" class="btn btn-primary btn-block">Configure</button>
             </div>
         </div>

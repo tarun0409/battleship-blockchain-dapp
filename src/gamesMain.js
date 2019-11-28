@@ -88,7 +88,7 @@ $(document).ready(function(){
             data: JSON.stringify(gameObj),
             success: function(response) {
                 console.log(response);
-                window.location.href = '/';
+                window.location.href = '/';  
             },
             error: function(response) {
                 console.log(response.responseText);

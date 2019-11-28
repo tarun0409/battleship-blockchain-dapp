@@ -9,6 +9,7 @@ $(document).ready(function(){
         window.location.href='/';
         return;
     }
+    
     buttonClicked = false;
     clickedButton = null;
     numShipConfigured = 0;
@@ -20,6 +21,7 @@ $(document).ready(function(){
     shipsConfigured.destroyer = false;
     gridObj = {};
     gridObj.Type="ocean";
+    matrix = null;
     $("#selectItems").hide();
     for(var i=0; i<10; i++)
     {
@@ -148,6 +150,14 @@ $(document).ready(function(){
             alert("Please configure all the ships before proceeding");
             return;
         }
+        var nonce = $("#nonce").val();
+        if(nonce==="")
+        {
+            alert("Please enter a nonce");
+            return;
+        }
+        gridObj.Public_Key = getCookie('publicKey');
+        gridObj.nonce = nonce;
         var postUrl = "/grid?gameId="+getCookie('gameId')+"&playerId="+getCookie('playerId');
         $.ajax({
             type: "POST",
@@ -156,6 +166,7 @@ $(document).ready(function(){
             dataType: "json",
             data: JSON.stringify(gridObj),
             success: function(response) {
+                matrix = response.data[0].Grid;
                 tGridObj = {};
                 tGridObj.Type = "target";
                 $.ajax({
@@ -165,7 +176,29 @@ $(document).ready(function(){
                     dataType: "json",
                     data: JSON.stringify(tGridObj),
                     success: function(response) {
-                        window.location.href = '/play';
+                        var gridStr = "";
+                        for(var i=0; i<10; i++)
+                        {
+                            for(var j=0; j<10; j++)
+                            {
+                                gridStr += matrix[i][j];
+                            }
+                        }
+                        var bGameId = web3.fromAscii(getCookie('gameId'));
+                        var boardHash = web3.sha3(nonce+gridStr);
+                        var one_ether = web3.toWei("1");
+                        web3.eth.getCoinbase(function(err,res){
+                            var fromObj = {};
+                            fromObj.from = res;
+                            fromObj.value = one_ether;
+                            Battleship.deployed().then((instance) => {
+                                instance.joinGame(bGameId, boardHash, fromObj).then(() => {
+                                    window.location.href = '/play';
+                                }).catch((err) => {
+                                    console.log(err);
+                                });
+                            });
+                        });
                     },
                     error: function(response) {
                         alert(response.responseJSON.msg);

@@ -38,6 +38,7 @@ contract Battleship
     mapping (address => bool) cheated; // did a particular user cheat
     uint8[100] moves_owner; // list of moves player1
     uint8[100] moves_challenger;  // list of moves player2
+    bool exists;
   }
   
   // Game[] public games;
@@ -145,36 +146,50 @@ contract Battleship
   }
 
   
-  function createGame(bytes32 gameId, uint8 gridSize, bytes32 secret) public payable
-  {
-    require (msg.value == bidAmount,"bid 1 ether");
-    // uint gameId = games.length;
-    // games.length++;
-    games[gameId].num = 0;
-    games[gameId].status = GameStatus.OPEN; // created
-    games[gameId].gridSize = gridSize;
-    games[gameId].owner = msg.sender;
-    games[gameId].turn = msg.sender; // set player1's turn
-    games[gameId].secrets[msg.sender] = secret;
-    games[gameId].targets[msg.sender] = new int[](gridSize ** 2); // make new target board for player1
-    games[gameId].funds = msg.value;
+  // function createGame(bytes32 gameId, uint8 gridSize, bytes32 secret) public payable
+  // {
+  //   require (msg.value == bidAmount,"bid 1 ether");
+  //   // uint gameId = games.length;
+  //   // games.length++;
+  //   games[gameId].num = 0;
+  //   games[gameId].status = GameStatus.OPEN; // created
+  //   games[gameId].gridSize = gridSize;
+  //   games[gameId].owner = msg.sender;
+  //   games[gameId].turn = msg.sender; // set player1's turn
+  //   games[gameId].secrets[msg.sender] = secret;
+  //   games[gameId].targets[msg.sender] = new int[](gridSize ** 2); // make new target board for player1
+  //   games[gameId].funds = msg.value;
 
-    // game_list_of_a_player[msg.sender].push(gameId);
+  //   // game_list_of_a_player[msg.sender].push(gameId);
 
-  }
+  // }
 
   function joinGame(bytes32 gameId, bytes32 secret) public payable gameOpen(gameId)
   {
-    require (msg.value == bidAmount,"bid 1 ether");  
-    require(games[gameId].owner != msg.sender ,"owner cannot join again, he already has!"); 
-    require(games[gameId].funds == msg.value,"insufficient funds");
+    require (msg.value == bidAmount,"bid 1 ether"); 
+    // require(games[gameId].owner != msg.sender ,"owner cannot join again, he already has!"); 
+    if(!games[gameId].exists)
+    {
+        games[gameId].num = 0;
+        games[gameId].status = GameStatus.OPEN; // created
+        games[gameId].gridSize = 10;
+        games[gameId].owner = msg.sender;
+        games[gameId].turn = msg.sender; // set player1's turn
+        games[gameId].secrets[msg.sender] = secret;
+        games[gameId].targets[msg.sender] = new int[](100); // make new target board for player1
+        games[gameId].funds = msg.value;  
+        games[gameId].exists = true;
+    }
+    else
+    {
+        require(games[gameId].funds == msg.value,"insufficient funds");
 
-    games[gameId].status = GameStatus.READY;
-    games[gameId].challenger = msg.sender; // player2 is the challenger
-    games[gameId].secrets[msg.sender] = secret;
-    games[gameId].targets[msg.sender] = new int[](games[gameId].gridSize ** 2); // make new target board for player2
-    games[gameId].funds += msg.value;
-
+        games[gameId].status = GameStatus.READY;
+        games[gameId].challenger = msg.sender; // player2 is the challenger
+        games[gameId].secrets[msg.sender] = secret;
+        games[gameId].targets[msg.sender] = new int[](games[gameId].gridSize ** 2); // make new target board for player2
+        games[gameId].funds += msg.value;
+    }
     // game_list_of_a_player[msg.sender].push(gameId);
   }
 

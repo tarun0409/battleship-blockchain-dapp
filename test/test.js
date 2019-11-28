@@ -20,7 +20,7 @@ contract('Battleship ::: Test 1',function(accounts){
     // gameId++; // 0
 
     
-    await bs.createGame(gameId, 10, playerOneBoardHash, { from: playerA, value:one_ether });
+    await bs.joinGame(gameId, playerOneBoardHash, { from: playerA, value:one_ether });
 
     status = await bs.getStatus(gameId);
     
@@ -31,19 +31,19 @@ contract('Battleship ::: Test 1',function(accounts){
     assert.equal(owner, playerA, "Owner address not saved");
     assert.equal(turn, owner, "Wrong turn");
   });
-    it("should not join (own) game", async () => {
-        const bs = await battleship.deployed();
+//     it("should not join (own) game", async () => {
+//         const bs = await battleship.deployed();
     
-        try 
-        {
-          await bs.joinGame(gameId, playerOneBoardHash, { from: playerA });
-          assert.fail("Owner was able to join own game");
-        } 
-        catch (err) 
-        {
+//         try 
+//         {
+//           await bs.joinGame(gameId, playerOneBoardHash, { from: playerA });
+//           assert.fail("Owner was able to join own game");
+//         } 
+//         catch (err) 
+//         {
           
-        }
-});
+//         }
+// });
 it("should join game", async () => {
   const bs = await battleship.deployed();
   const one_ether = await web3.utils.toWei("1");
