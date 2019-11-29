@@ -8,7 +8,7 @@ contract Battleship
   uint8 constant SHIP_CRUISER = 3;
   uint8 constant SHIP_SUBMARINE = 3;
   uint8 constant SHIP_DESTROYER = 2;
-  uint private bidAmount = 1 ether;
+  uint private bidAmount = 1000;
   int8 constant HIT = 1;
   int8 constant MISS = -1;
   uint miss = 0;
@@ -20,6 +20,7 @@ contract Battleship
   bytes positions;
   uint shipp;
   bytes1 cnt;
+  bool isCounterAttack;
   bytes32 secret_test;//=0x1bd1a2e6d0afcba49b2ce8cd8749126088dcbc0916ca2ac53e363cd5820db3c9;
   enum GameStatus { OPEN, READY, STARTED, FINISHED, DONE }
   struct Game {
@@ -166,7 +167,7 @@ contract Battleship
 
   function joinGame(bytes32 gameId, bytes32 secret) public payable gameOpen(gameId)
   {
-    require (msg.value == bidAmount,"bid 1 ether"); 
+    require (msg.value >= bidAmount,"bit atleast 1000 Wei"); 
     // require(games[gameId].owner != msg.sender ,"owner cannot join again, he already has!"); 
     if(!games[gameId].exists)
     {
@@ -193,45 +194,62 @@ contract Battleship
     // game_list_of_a_player[msg.sender].push(gameId);
   }
 
-function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
-{
+  function convert_to_1D(uint8 x, uint8 y) private pure returns(uint8)
+  {
     uint8 ans = (x * 10) + y;
     return(ans);
-}
-  function attack(bytes32 gameId, uint8 x,uint8 y) public payable gameReady(gameId) myTurn(gameId)
+  }
+  function attack(bytes32 gameId, uint8 x,uint8 y) public payable myTurn(gameId)
   {
-      uint8 index = convert_to_1D(x,y);
+    uint8 index = convert_to_1D(x,y);
     address opponent = getOpponent(gameId, msg.sender);
 
-    games[gameId].status = GameStatus.STARTED; // first attack happened
+    if(!isCounterAttack)
+    {
+      games[gameId].status = GameStatus.STARTED; // first attack happened
 
-    _attack(gameId, msg.sender, opponent, index);
+      _attack(gameId, msg.sender, opponent, index);
+      isCounterAttack = true;
+    }
+    else
+    {
+      _attack(gameId, msg.sender, opponent, index);
+      uint[3] memory state = getGridState(games[gameId].targets[opponent]);
+      uint fleet = 17;//getFleetSize(games[gameId].gridSize);
+      lost = state[0];
+      win = state[1];
+      nothin = state[2];
+      bool isWon = state[1] >= fleet;
+      bool isVoid = (fleet - state[1]) > state[2];
+      if (isWon || isVoid) {
+        games[gameId].status = GameStatus.FINISHED;
+        games[gameId].winner = opponent;
+      }
+    }
   }
 
-  function counterAttack(bytes32 gameId, uint8 x, uint8 y, bool hitt) public payable gameStarted(gameId) myTurn(gameId)
-  {
-    uint8 index = convert_to_1D(x,y);  
-    address payable opponent = getOpponent(gameId, msg.sender);
+  // function counterAttack(bytes32 gameId, uint8 x, uint8 y) public payable gameStarted(gameId) myTurn(gameId)
+  // {
+  //   uint8 index = convert_to_1D(x,y);  
+  //   address payable opponent = getOpponent(gameId, msg.sender);
+  //   _attack(gameId, msg.sender, opponent, index);
+  //   uint[3] memory state = getGridState(games[gameId].targets[opponent]);
+  //   uint fleet = 17;//getFleetSize(games[gameId].gridSize);
+  //   lost = state[0];
+  //   win = state[1];
+  //   nothin = state[2];
+  //   bool isWon = state[1] >= fleet;
+  //   bool isVoid = (fleet - state[1]) > state[2];
+  //   if (isWon || isVoid) {
+  //     games[gameId].status = GameStatus.FINISHED;
+  //     games[gameId].winner = opponent;
+  //   }
+  // }
+
+  function announceStatus(bytes32 gameId, bool hitt) public gameStarted(gameId) myTurn(gameId) {
     uint8 targetIndex = games[gameId].targetIndex;
-
+    address payable opponent = getOpponent(gameId, msg.sender);
     games[gameId].targets[opponent][targetIndex] = hitt ? HIT : MISS;
-
-    _attack(gameId, msg.sender, opponent, index);
-
-    uint[3] memory state = getGridState(games[gameId].targets[opponent]);
-    uint fleet = 17;//getFleetSize(games[gameId].gridSize);
-    lost = state[0];
-    win = state[1];
-    nothin = state[2];
-    bool isWon = state[1] >= fleet;
-    bool isVoid = (fleet - state[1]) > state[2];
-
-    if (isWon || isVoid) {
-      games[gameId].status = GameStatus.FINISHED;
-      games[gameId].winner = opponent;
-      //opponent.transfer(games[gameId].funds);
-
-    }
   }
 
   function reveal(bytes32 gameId, string memory salt, string memory ship, address player) public gameFinished(gameId) onlyPlayer(gameId) notRevealed(gameId)

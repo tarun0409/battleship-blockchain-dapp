@@ -186,11 +186,11 @@ $(document).ready(function(){
                         }
                         var bGameId = web3.fromAscii(getCookie('gameId'));
                         var boardHash = web3.sha3(nonce+gridStr);
-                        var one_ether = web3.toWei("1");
+                        // var one_ether = web3.toWei("1");
                         web3.eth.getCoinbase(function(err,res){
                             var fromObj = {};
                             fromObj.from = res;
-                            fromObj.value = one_ether;
+                            fromObj.value = 1000;
                             Battleship.deployed().then((instance) => {
                                 instance.joinGame(bGameId, boardHash, fromObj).then(() => {
                                     window.location.href = '/play';

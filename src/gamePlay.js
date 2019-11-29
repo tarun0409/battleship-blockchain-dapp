@@ -215,10 +215,26 @@ $(document).ready(function(){
             type: "POST",
             url: attackUrl,
             success: function(response) {
-                $(clickedButton).empty();
-                $(clickedButton).append("X");
-                $(clickedButton).removeClass('btn-light');
-                $(clickedButton).addClass('btn-dark'); 
+                var xPos = parseInt(x);
+                var yPos = parseInt(y);
+                var bGameId = web3.fromAscii(getCookie('gameId'));
+                web3.eth.getCoinbase(function(err,res){
+                    var fromObj = {};
+                    fromObj.from = res;
+                    Battleship.deployed().then((instance) => {
+                        instance.attack(bGameId, xPos, yPos, fromObj).then(() => {
+                            $(clickedButton).empty();
+                            $(clickedButton).append("X");
+                            $(clickedButton).removeClass('btn-light');
+                            $(clickedButton).addClass('btn-dark'); 
+                        }).catch((err) => {
+                            alert(response.responseJSON.msg);
+                            $(clickedButton).removeClass('btn-light');
+                            $(clickedButton).addClass('btn-dark');
+                            clickedButton = null;
+                        });
+                    });
+                });
             },
             error: function(response) {
                 alert(response.responseJSON.msg);
@@ -227,7 +243,6 @@ $(document).ready(function(){
                 clickedButton = null;
             }
         });
-        
     });
     $("#hit").click(function(){
         var hitUrl = "/game/"+getCookie('gameId')+"/effect/hit?playerId="+getCookie('playerId');
@@ -235,7 +250,18 @@ $(document).ready(function(){
             type: "POST",
             url: hitUrl,
             success: function(response) {
-                window.location.href = '/battle';
+                web3.eth.getCoinbase(function(err,res){
+                    var fromObj = {};
+                    fromObj.from = res;
+                    var bGameId = web3.fromAscii(getCookie('gameId'));
+                    Battleship.deployed().then((instance) => {
+                        instance.announceStatus(bGameId, true, fromObj).then(() => {
+                            window.location.href = '/battle';
+                        }).catch((err) => {
+                            alert(err);
+                        });
+                    });
+                });
             },
             error: function(response) {
                 alert(response.responseJSON.msg);
@@ -248,7 +274,18 @@ $(document).ready(function(){
             type: "POST",
             url: hitUrl,
             success: function(response) {
-                window.location.href = '/battle';
+                web3.eth.getCoinbase(function(err,res){
+                    var fromObj = {};
+                    fromObj.from = res;
+                    var bGameId = web3.fromAscii(getCookie('gameId'));
+                    Battleship.deployed().then((instance) => {
+                        instance.announceStatus(bGameId, false, fromObj).then(() => {
+                            window.location.href = '/battle';
+                        }).catch((err) => {
+                            alert(err);
+                        });
+                    });
+                });
             },
             error: function(response) {
                 alert(response.responseJSON.msg);
