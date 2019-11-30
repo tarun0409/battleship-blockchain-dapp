@@ -108,8 +108,6 @@ contract Battleship
     {
         uint index = (x*10)+y;
         games[gameId].currentTarget = int8(index);
-        games[gameId].attacker = games[gameId].defender;
-        games[gameId].defender = msg.sender;
     }
 
     function announceStatus(bytes32 gameId, bool hit) public gameStarted(gameId) onlyPlayer(gameId) playerIsDefender(gameId) attacked(gameId)
@@ -123,9 +121,11 @@ contract Battleship
             games[gameId].player_board[msg.sender][uint8(games[gameId].currentTarget)] = -1;
         }
         games[gameId].currentTarget = -1;
+        games[gameId].defender = games[gameId].attacker;
+        games[gameId].attacker = msg.sender;
     }
 
-    function finishGame(bytes32 gameId) public gameStarted(gameId) onlyPlayer(gameId)
+    function finishGame(bytes32 gameId) public onlyPlayer(gameId)
     {
         games[gameId].status = GameStatus.FINISHED;
     }
@@ -174,6 +174,7 @@ contract Battleship
         else
         {
             msg.sender.transfer(games[gameId].bounty);
+            games[gameId].winner = msg.sender;
         }
         games[gameId].status = GameStatus.CLOSED;
     }
@@ -186,4 +187,11 @@ contract Battleship
         }
         return address(0);
     }
+
+    function playerCheated(bytes32 gameId) public view bothPlayersRevealed(gameId) returns(bool)
+    {
+        return games[gameId].player_cheated[msg.sender];
+    }
+
+    //testing purpose
 }

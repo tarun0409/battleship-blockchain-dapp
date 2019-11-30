@@ -9,6 +9,8 @@ var GameSchema = new Schema({
     Player_One_Target_Grid:Schema.Types.ObjectId,
     Player_Two_Ocean_Grid:Schema.Types.ObjectId,
     Player_Two_Target_Grid:Schema.Types.ObjectId,
+    Player_One_Original_Grid:Schema.Types.ObjectId,
+    Player_Two_Original_Grid:Schema.Types.ObjectId,
     Players_Joined: Number,
     Current_Attacker:Schema.Types.ObjectId,
     Current_Defender:Schema.Types.ObjectId,

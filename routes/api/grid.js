@@ -66,6 +66,68 @@ router.get('/',(req,res) => {
     });
 });
 
+router.get('/original/string', (req,res) => {
+    if(!req.query.playerId)
+    {
+        return res.status(400).json({msg:"Query field to be included: playerId", query:req.query});
+    }
+    if(!req.query.gameId)
+    {
+        return res.status(400).json({msg:"Query field to be included: gameId", query:req.query});
+    }
+    var playerId = ObjectId(req.query.playerId);
+    var gameId = ObjectId(req.query.gameId);
+    var playerQuery = {};
+    playerQuery._id = playerId;
+    var gameQuery = {};
+    gameQuery._id = gameId;
+    Player.find(playerQuery).then((players) => {
+        if(players.length === 0)
+        {
+            return res.status(400).json({msg:"Invalid player ID", query:req.query.playerId});
+        }
+        Game.find(gameQuery).then((games) => {
+            if(games.length === 0)
+            {
+                return res.status(400).json({msg:"Invalid game ID", input:req.params.gameId});
+            }
+            var gridQuery = {};
+            if(String(games[0].Player_One) === String(playerId))
+            {
+                gridQuery._id = games[0].Player_One_Original_Grid;
+            }
+            else if(String(games[0].Player_Two) === String(playerId))
+            {
+                gridQuery._id = games[0].Player_Two_Original_Grid;
+            }
+            Grid.find(gridQuery).then((grids) => {
+                if(grids.length === 0)
+                {
+                    return res.status(204).json({grids:[]});
+                }
+                var gridString = "";
+                for(var i=0; i<10; i++)
+                {
+                    for(var j=0; j<10; j++)
+                    {
+                        gridString += grids[0].Grid[i][j];
+                    }
+                }
+                res.status(200).json({grid_string:gridString});
+            }).catch((err) => {
+                console.log(err);
+                return res.status(500).json({msg:"Problem with fetching grids from the database"});
+            });
+        }).catch((err) => {
+            console.log(err);
+            return res.status(500).json({msg:"Problem with fetching games from the database"});
+        });;
+    }).catch((err) => {
+        console.log(err);
+        return res.status(500).json({msg:"Problem with fetching players from the database"});
+    });;
+});
+
 router.post('/',(req,res) => {
     if(!req.body)
     {
@@ -78,6 +140,10 @@ router.post('/',(req,res) => {
     if(!req.query.playerId)
     {
         return res.status(400).json({msg:"Query field to be included: playerId", query:req.query});
+    }
+    if(!req.body.Carrier || !req.body.Battleship || !req.body.Cruiser || !req.body.Submarine || !req.body.Destroyer)
+    {
+        return res.status(400).json({msg:"One or more of the battleships have not been set", input:req.body});
     }
     var playerId = ObjectId(req.query.playerId);
     var gameId = ObjectId(req.query.gameId);
@@ -95,27 +161,13 @@ router.post('/',(req,res) => {
             {
                 return res.status(400).json({msg:"Invalid game ID", input:req.params.gameId});
             }
-            if(!games[0].Player_One)
-            {
-                return res.status(400).json({msg:"Grid can be created only after joining the game"});
-            }
             var grids = Array();
-            var grid = {};
-            if(!req.body.Type)
-            {
-                return res.status(400).json({msg:"Fields to be inserted : Type", input:req.body});
-            }
-            if(req.body.Type != "ocean" && req.body.Type!="target")
-            {
-                return res.status(400).json({msg:"Grid type should be ocean or target", input:req.body});
-            }
-            if(req.body.Type === "ocean")
-            {
-                if(!req.body.Carrier || !req.body.Battleship || !req.body.Cruiser || !req.body.Submarine || !req.body.Destroyer)
-                {
-                    return res.status(400).json({msg:"One or more of the battleships have not been set", input:req.body});
-                }
-            }
+            var targetGrid = {};
+            var oceanGrid = {};
+            var duplicateGrid = {};
+            targetGrid.Type = "target";
+            oceanGrid.Type = "ocean";
+            duplicateGrid.Type = "ocean";
             theGrid = Array();
             for(var i=0; i<10; i++)
             {
@@ -126,78 +178,104 @@ router.post('/',(req,res) => {
                 }
                 theGrid.push(row);
             }
-    
-            if(req.body.Type === "ocean")
+            targetGrid.Grid = Array();
+            for(var i=0; i<10; i++)
             {
-                var ships = ["Carrier","Battleship","Cruiser","Submarine","Destroyer"];
-                var ship_to_size = {"Carrier":5,"Battleship":4,"Cruiser":3,"Submarine":3,"Destroyer":2};
-                for(var k=0; k<ships.length; k++)
+                targetGrid.Grid.push(theGrid[i].slice());
+            }
+            var tGridObj = new Grid(targetGrid);
+            grids.push(tGridObj);
+            var ships = ["Carrier","Battleship","Cruiser","Submarine","Destroyer"];
+            var ship_to_size = {"Carrier":5,"Battleship":4,"Cruiser":3,"Submarine":3,"Destroyer":2};
+            for(var k=0; k<ships.length; k++)
+            {
+                ship = ships[k];
+                shipObj = req.body[ship];
+                var end_i = (shipObj.orientation === "vertical")?(shipObj.start[0]+ship_to_size[ship]):shipObj.start[0]+1;
+                if(end_i > theGrid.length)
                 {
-                    ship = ships[k];
-                    shipObj = req.body[ship];
-                    var end_i = (shipObj.orientation === "vertical")?(shipObj.start[0]+ship_to_size[ship]):shipObj.start[0]+1;
-                    if(end_i > theGrid.length)
-                    {
-                        return res.status(400).json({msg:"Ship placement goes out of board", input:req.body});
-                    }
-                    var end_j = (shipObj.orientation === "horizontal")?(shipObj.start[1]+ship_to_size[ship]):shipObj.start[1]+1;
-                    if(end_j > theGrid[0].length)
-                    {
-                        return res.status(400).json({msg:"Ship placement goes out of board", input:req.body});
-                    }
+                    return res.status(400).json({msg:"Ship placement goes out of board", input:req.body});
+                }
+                var end_j = (shipObj.orientation === "horizontal")?(shipObj.start[1]+ship_to_size[ship]):shipObj.start[1]+1;
+                if(end_j > theGrid[0].length)
+                {
+                    return res.status(400).json({msg:"Ship placement goes out of board", input:req.body});
+                }
             
-                    for( var i = shipObj.start[0]; i<end_i; i++)
+                for( var i = shipObj.start[0]; i<end_i; i++)
+                {
+                    for(var j = shipObj.start[1] ; j<end_j; j++)
                     {
-                        for(var j = shipObj.start[1] ; j<end_j; j++)
+                        if(theGrid[i][j] > 0)
                         {
-                            if(theGrid[i][j] > 0)
-                            {
-                                return res.status(400).json({msg:"Two ships cannot occupy a the same cell", input:req.body});
-                            }
-                            theGrid[i][j] = (k+1);
+                            return res.status(400).json({msg:"Two ships cannot occupy a the same cell", input:req.body});
                         }
+                        theGrid[i][j] = (k+1);
                     }
                 }
             }
-            grid.Type = req.body.Type;
-            grid.Grid = theGrid;
-            var gridObj = new Grid(grid);
-            grids.push(gridObj);
-            Grid.create(grids).then((createdGrid) => {
+            oceanGrid.Grid = Array();
+            for(var i=0; i<10; i++)
+            {
+                oceanGrid.Grid.push(theGrid[i].slice());
+            }
+            var oGridObj = new Grid(oceanGrid);
+            grids.push(oGridObj);
+            duplicateGrid.Grid = theGrid;
+            var dGridObj = new Grid(duplicateGrid);
+            grids.push(dGridObj);
+            Grid.create(grids).then((createdGrids) => {
                 gameUpdateQueryObj = {};
                 gameUpdateQueryObj._id = gameId;
                 gameUpdateObj = {};
-                if(String(games[0].Player_One) === String(playerId) && req.body.Type === "ocean" && !games[0].Player_One_Ocean_Grid)
+                for(var i=0; i<3; i++)
                 {
-                    gameUpdateObj.Player_One_Ocean_Grid = createdGrid[0]._id;
-                    gameUpdateObj.Player_One_Remaining = 17;
-                }
-                else if(String(games[0].Player_One) === String(playerId) && req.body.Type === "target" && !games[0].Player_One_Target_Grid)
-                {
-                    gameUpdateObj.Player_One_Target_Grid = createdGrid[0]._id;
-                    gameUpdateObj.Player_One_Remaining = 17;
-                }
-                else if(String(games[0].Player_One) === String(playerId))
-                {
-                    return res.status(400).json({msg:"The player has already created the corresponding grid"});
-                }
-                else if(!games[0].Player_Two)
-                {
-                    return res.status(400).json({msg:"Grid can be created only after joining the game"});
-                }
-                else if(String(games[0].Player_Two) === String(playerId) && req.body.Type === "ocean")
-                {
-                    gameUpdateObj.Player_Two_Ocean_Grid = createdGrid[0]._id;
-                    gameUpdateObj.Player_Two_Remaining = 17;
-                }
-                else if(String(games[0].Player_Two) === String(playerId) && req.body.Type === "target")
-                {
-                    gameUpdateObj.Player_Two_Target_Grid = createdGrid[0]._id;
-                    gameUpdateObj.Player_Two_Remaining = 17;
-                }
-                else
-                {
-                    return res.status(400).json({msg:"The player has already created the corresponding grid"});
+                    if(String(games[0].Player_One) === String(playerId))
+                    {
+                        if(games[0].Player_One_Ocean_Grid)
+                        {
+                            return res.status(400).json({msg:"The player has already created the corresponding grid"});
+                        }
+                        if(createdGrids[i].Type === "target")
+                        {
+                            gameUpdateObj.Player_One_Target_Grid = createdGrids[i]._id;
+                        }
+                        else if(createdGrids[i].Type === "ocean")
+                        {
+                            if(gameUpdateObj.Player_One_Ocean_Grid)
+                            {
+                                gameUpdateObj.Player_One_Original_Grid = createdGrids[i]._id;
+                            }
+                            else
+                            {
+                                gameUpdateObj.Player_One_Ocean_Grid = createdGrids[i]._id;
+                            }
+                        }
+                        gameUpdateObj.Player_One_Remaining = 17;
+                    }
+                    else
+                    {
+                        if(games[0].Player_Two_Ocean_Grid)
+                        {
+                            return res.status(400).json({msg:"The player has already created the corresponding grid"});
+                        }
+                        if(createdGrids[i].Type === "target")
+                        {
+                            gameUpdateObj.Player_Two_Target_Grid = createdGrids[i]._id;
+                        }
+                        else if(createdGrids[i].Type === "ocean")
+                        {
+                            if(gameUpdateObj.Player_Two_Ocean_Grid)
+                            {
+                                gameUpdateObj.Player_Two_Original_Grid = createdGrids[i]._id;
+                            }
+                            else
+                            {
+                                gameUpdateObj.Player_Two_Ocean_Grid = createdGrids[i]._id;
+                            }
+                        }
+                        gameUpdateObj.Player_Two_Remaining = 17;
+                    }
                 }
                 Game.updateOne(gameUpdateQueryObj,gameUpdateObj, (err) => {
                     if(err)
@@ -205,24 +283,23 @@ router.post('/',(req,res) => {
                         return res.status(500).json({msg:"Some problem occurred while updating game"});
                     }
                     successResponseObj = Object()
-                    successResponseObj.msg = "Grid created successfully!"
-                    successResponseObj.data = createdGrid;
+                    successResponseObj.msg = "Grids created successfully!"
+                    successResponseObj.data = createdGrids;
                     return res.status(201).json(successResponseObj);
                 });
             }).catch((err) => {
                 console.log(err);
-                return res.status(500).json({msg:"Problem with inserting grid to the database"});
-            });
+                return res.status(500).json({msg:"Problem with inserting grids to the database"});
+            });;
 
         }).catch((err) => {
             console.log(err);
             return res.status(500).json({msg:"Problem with fetching games from the database"});
-        });
-
+        });;
     }).catch((err) => {
         console.log(err);
         return res.status(500).json({msg:"Problem with fetching players from the database"});
-    });
-    
+    });;
 });
+
 module.exports = router;

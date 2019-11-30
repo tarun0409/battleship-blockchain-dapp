@@ -23,18 +23,69 @@ $(document).ready(function(){
                 success: function(response){
                     if(response.winner)
                     {
-                        alert(response.winner);
-                        // var nonce_reveal = prompt("Game Over! Reveal the nonce to announce winner");
-                        // web3.eth.getCoinbase(function(err,res){
-                        //     var fromObj = {};
-                        //     fromObj.from = res;
-                        //     var bGameId = web3.fromAscii(getCookie('gameId'));
-                        //     Battleship.deployed().then((instance) => {
-                        //         instance.finishGame(bGameId).then(() => {
-                        //             instance.reveal(bGameId, nonce_reveal, )  
-                        //         });
-                        //     });
-                        // });
+                        var origUrl = "/grid/original/string?gameId="+getCookie('gameId')+"&playerId="+getCookie('playerId');
+                        $.ajax({
+                            type:"GET",
+                            url:origUrl,
+                            success: function(gRes) {
+                                var gString = gRes.grid_string;
+                                var nonce_reveal = prompt("Game Over! Reveal the nonce");
+                                web3.eth.getCoinbase(function(err,res){
+                                    var fromObj = {};
+                                    fromObj.from = res;
+                                    var bGameId = web3.fromAscii(getCookie('gameId'));
+                                    Battleship.deployed().then((instance) => {
+                                        instance.finishGame(bGameId, fromObj).then(() => {
+                                            instance.reveal(bGameId, nonce_reveal, gString, fromObj).then(() => {
+                                                if(response.winner === getCookie('playerId'))
+                                                {
+                                                    instance.withdraw(bGameId, fromObj).then(() => {
+                                                        instance.playerCheated(bGameId, fromObj).then((playerCheated) => {
+                                                            if(playerCheated)
+                                                            {
+                                                                if(window.confirm("You cheated. Funds go to other player if they have not cheated."))
+                                                                {
+                                                                    window.location.href = '/';
+                                                                }
+                                                                else
+                                                                {
+                                                                    window.location.href = '/';
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                if(window.confirm("Congratulations! You won!"))
+                                                                {
+                                                                    window.location.href = '/';
+                                                                }
+                                                                else
+                                                                {
+                                                                    window.location.href = '/';
+                                                                }
+                                                            }
+                                                        });
+                                                    });
+                                                }
+                                                else
+                                                {
+                                                    if(window.confirm("Sorry you lost. If you have not cheated and other player has cheated, funds will be transfered to you"))
+                                                    {
+                                                        window.location.href = '/';
+                                                    }
+                                                    else
+                                                    {
+                                                        window.location.href = '/';
+                                                    }
+                                                }
+                                            });  
+                                        });
+                                    });
+                                });
+                            },
+                            error: function(err) {
+                                console.log(response.responseText);
+                            }
+                        });
                     }
                     var attack_i = -1;
                     var attack_j = -1;

@@ -17,8 +17,10 @@ contract('Battleship ::: Test 1',function(accounts){
   it("should not return exception",async () => {
       const bs = await battleship.deployed();
       // const one_ether = await web3.utils.toWei("1");
-      await bs.joinGame(gameId, playerOneBoardHash, { from: playerA, value:1000 });
-      await bs.joinGame(gameId, playerTwoBoardHash, { from: playerB, value:1000 });
+      await bs.joinGame(gameId, playerOneBoardHash, { from: playerA, value:100000000000000 });
+      await bs.joinGame(gameId, playerTwoBoardHash, { from: playerB, value:100000000000000 });
+      // console.log(await bs.getPlayerOne(gameId, {from:playerA}));
+      // console.log(await bs.getPlayerTwo(gameId, {from:playerA}));
       await bs.attack(gameId, 1,1, {from:playerA});
       await bs.announceStatus(gameId, true, {from:playerB});
       await bs.attack(gameId,1,2,{from:playerB});

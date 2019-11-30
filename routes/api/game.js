@@ -226,7 +226,7 @@ router.get('/:gameId/move',(req,res) => {
             if(games[0].Winner)
             {
                 msg = (String(playerId) === String(games[0].Winner))?"You have won the game!":"Your opponent has won the game!";
-                return res.status(200).json({winner:games[0].Winner, msg})
+                return res.status(200).json({winner:String(games[0].Winner), msg})
             }
             var oppSunkShips = null;
             if(String(playerId) === String(games[0].Player_One))
