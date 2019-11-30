@@ -156,8 +156,8 @@ $(document).ready(function(){
             alert("Please enter a nonce");
             return;
         }
-        gridObj.Public_Key = getCookie('publicKey');
-        gridObj.nonce = nonce;
+        // gridObj.Public_Key = getCookie('publicKey');
+        // gridObj.nonce = nonce;
         var postUrl = "/grid?gameId="+getCookie('gameId')+"&playerId="+getCookie('playerId');
         $.ajax({
             type: "POST",
@@ -190,7 +190,7 @@ $(document).ready(function(){
                         web3.eth.getCoinbase(function(err,res){
                             var fromObj = {};
                             fromObj.from = res;
-                            fromObj.value = 1000;
+                            fromObj.value = 100000000000000;
                             Battleship.deployed().then((instance) => {
                                 instance.joinGame(bGameId, boardHash, fromObj).then(() => {
                                     window.location.href = '/play';

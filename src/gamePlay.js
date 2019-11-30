@@ -23,10 +23,18 @@ $(document).ready(function(){
                 success: function(response){
                     if(response.winner)
                     {
-                        if(window.confirm(response.msg))
-                        {
-                            window.location.href = '/';
-                        }
+                        alert(response.winner);
+                        // var nonce_reveal = prompt("Game Over! Reveal the nonce to announce winner");
+                        // web3.eth.getCoinbase(function(err,res){
+                        //     var fromObj = {};
+                        //     fromObj.from = res;
+                        //     var bGameId = web3.fromAscii(getCookie('gameId'));
+                        //     Battleship.deployed().then((instance) => {
+                        //         instance.finishGame(bGameId).then(() => {
+                        //             instance.reveal(bGameId, nonce_reveal, )  
+                        //         });
+                        //     });
+                        // });
                     }
                     var attack_i = -1;
                     var attack_j = -1;
