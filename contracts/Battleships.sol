@@ -194,4 +194,36 @@ contract Battleship
     }
 
     //testing purpose
+    function getPlayerOne(bytes32 gameId) public view returns(address)
+    {
+        return games[gameId].player1;
+    }
+    function gameIsStarted(bytes32 gameId) public view returns(bool)
+    {
+        return games[gameId].status == GameStatus.STARTED;
+    }
+    function playerHasAttacked(bytes32 gameId) public view returns(bool)
+    {
+        return games[gameId].currentTarget >= 0;
+    }
+    function playerHasDefended(bytes32 gameId) public view returns(bool)
+    {
+         return games[gameId].currentTarget < 0;
+    }
+    function gameIsFinished(bytes32 gameId) public view returns(bool)
+    {
+        return games[gameId].status == GameStatus.FINISHED;
+    }
+    function twoPlayersRevealed(bytes32 gameId) public view returns(bool)
+    {
+        return games[gameId].player_revealed[games[gameId].player1] && games[gameId].player_revealed[games[gameId].player2];
+    }
+    function playerOneCheated(bytes32 gameId) public view returns(bool)
+    {
+        return games[gameId].player_cheated[games[gameId].player1];
+    }
+    function gameIsClosed(bytes32 gameId) public view returns(bool)
+    {
+        return games[gameId].status == GameStatus.CLOSED;
+    }
 }
